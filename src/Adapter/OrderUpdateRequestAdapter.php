@@ -9,7 +9,7 @@ use Paysera\DeliverySdk\Entity\MerchantOrderInterface;
 use Paysera\DeliverySdk\Entity\PayseraDeliveryOrderRequest;
 use Paysera\DeliverySdk\Utils\DeliveryGatewayUtils;
 
-class OrderUpdaterequestAdapter
+class OrderUpdateRequestAdapter
 {
     private ShipmentsAdapter $shipmentsAdapter;
     private OrderNotificationAdapter $notificationCallbackAdapter;
