@@ -6,27 +6,27 @@ namespace Paysera\DeliverySdk\Entity;
 
 interface MerchantOrderAddressInterface
 {
-    public function setCountry(string $country): void;
+    public function setCountry(string $country): self;
 
     public function getCountry(): string;
 
-    public function setState(string $state): void;
+    public function setState(string $state): self;
 
     public function getState(): string;
 
-    public function setCity(string $city): void;
+    public function setCity(string $city): self;
 
     public function getCity(): string;
 
-    public function setStreet(string $street): void;
+    public function setStreet(string $street): self;
 
     public function getStreet(): string;
 
-    public function setPostalCode(string $postalCode): void;
+    public function setPostalCode(string $postalCode): self;
 
     public function getPostalCode(): string;
 
-    public function setHouseNumber(?string $houseNumber): void;
+    public function setHouseNumber(?string $houseNumber): self;
 
     public function getHouseNumber(): ?string;
 }
