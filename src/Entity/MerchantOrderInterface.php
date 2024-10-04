@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Paysera\DeliverySdk\Entity;
 
-use Paysera\Collection\OrderItemsCollection;
+use Paysera\DeliverySdk\Collection\OrderItemsCollection;
 
 interface MerchantOrderInterface
 {
