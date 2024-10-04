@@ -4,9 +4,8 @@ declare(strict_types=1);
 
 namespace Paysera\DeliverySdk\Adapter;
 
-use Paysera\Collection\OrderItemsCollection;
 use Paysera\DeliveryApi\MerchantClient\Entity\ShipmentCreate;
-use Paysera\DeliverySdk\Entity\MerchantOrderItemInterface;
+use Paysera\DeliverySdk\Collection\OrderItemsCollection;
 
 class ShipmentsAdapter
 {
