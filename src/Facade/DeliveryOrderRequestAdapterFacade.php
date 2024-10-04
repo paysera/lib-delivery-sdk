@@ -7,17 +7,17 @@ namespace Paysera\DeliverySdk\Facade;
 use Paysera\DeliveryApi\MerchantClient\Entity\OrderCreate;
 use Paysera\DeliveryApi\MerchantClient\Entity\OrderUpdate;
 use Paysera\DeliverySdk\Adapter\OrderCreateRequestAdapter;
-use Paysera\DeliverySdk\Adapter\OrderUpdaterequestAdapter;
+use Paysera\DeliverySdk\Adapter\OrderUpdateRequestAdapter;
 use Paysera\DeliverySdk\Entity\PayseraDeliveryOrderRequest;
 
 class DeliveryOrderRequestAdapterFacade
 {
     private OrderCreateRequestAdapter $createAdapter;
-    private OrderUpdaterequestAdapter $updateAdapter;
+    private OrderUpdateRequestAdapter $updateAdapter;
 
     public function __construct(
         OrderCreateRequestAdapter $createAdapter,
-        OrderUpdaterequestAdapter $updateAdapter
+        OrderUpdateRequestAdapter $updateAdapter
     ) {
 
         $this->createAdapter = $createAdapter;
