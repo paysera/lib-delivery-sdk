@@ -6,6 +6,8 @@ namespace Paysera\DeliverySdk\Entity;
 
 interface MerchantOrderContactInterface
 {
+    public function setEmail(string $email): void;
+
     public function getFirstName(): string;
 
     public function getLastName(): string;
