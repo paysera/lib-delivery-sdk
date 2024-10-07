@@ -8,9 +8,8 @@ use Paysera\DeliveryApi\MerchantClient\Entity\Order;
 use Paysera\DeliverySdk\Client\DeliveryApiClient;
 use Paysera\DeliverySdk\Entity\MerchantOrderInterface;
 use Paysera\DeliverySdk\Entity\PayseraDeliveryOrderRequest;
-use Paysera\DeliverySdk\Facade\DeliveryOrderRequestAdapterFacade;
+use Paysera\DeliverySdk\Exception\DeliveryOrderRequestException;
 use Paysera\DeliverySdk\Repository\MerchantOrderRepositoryInterface;
-use Paysera\Helper\PayseraDeliveryOrderRequestHelper;
 
 class PayseraDeliveryOrderService
 {
@@ -31,6 +30,11 @@ class PayseraDeliveryOrderService
         $this->merchantOrderRepository = $merchantOrderRepository;
     }
 
+    /**
+     * @param PayseraDeliveryOrderRequest $deliveryOrderRequest
+     * @return MerchantOrderInterface|null
+     * @throws DeliveryOrderRequestException
+     */
     public function createDeliveryOrder(PayseraDeliveryOrderRequest $deliveryOrderRequest): ?MerchantOrderInterface
     {
         $this->logStepStarted(DeliveryApiClient::ACTION_CREATE, $deliveryOrderRequest);
@@ -40,6 +44,11 @@ class PayseraDeliveryOrderService
         return $deliveryOrderRequest->getOrder();
     }
 
+    /**
+     * @param PayseraDeliveryOrderRequest $deliveryOrderRequest
+     * @return MerchantOrderInterface|null
+     * @throws DeliveryOrderRequestException
+     */
     public function updateDeliveryOrder(PayseraDeliveryOrderRequest $deliveryOrderRequest): ?MerchantOrderInterface
     {
         $this->logStepStarted(DeliveryApiClient::ACTION_UPDATE, $deliveryOrderRequest);
@@ -51,6 +60,11 @@ class PayseraDeliveryOrderService
 
     #region Handling
 
+    /**
+     * @param PayseraDeliveryOrderRequest $deliveryOrderRequest
+     * @return Order
+     * @throws DeliveryOrderRequestException
+     */
     private function handleCreating(PayseraDeliveryOrderRequest $deliveryOrderRequest): Order
     {
         $order = $deliveryOrderRequest->getOrder();
