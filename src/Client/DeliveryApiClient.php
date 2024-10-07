@@ -42,6 +42,7 @@ class DeliveryApiClient
      * @param PayseraDeliveryOrderRequest $deliveryOrderRequest
      * @return Order
      * @throws DeliveryOrderRequestException
+     * @see self::handleCreating()
      */
     public function sendOrderCreateRequest(PayseraDeliveryOrderRequest $deliveryOrderRequest): Order
     {
@@ -52,6 +53,7 @@ class DeliveryApiClient
      * @param PayseraDeliveryOrderRequest $deliveryOrderRequest
      * @return Order
      * @throws DeliveryOrderRequestException
+     * @see self::handleUpdating()
      */
     public function sendOrderUpdateRequest(PayseraDeliveryOrderRequest $deliveryOrderRequest): Order
     {
@@ -94,7 +96,7 @@ class DeliveryApiClient
         try {
             return $this->{self::ORDER_REQUEST_HANDLERS[$action]}($deliveryOrderRequest);
         } catch (Exception $exception) {
-            $this->logException(self::ACTION_CREATE, $exception, $deliveryOrderRequest->getOrder());
+            $this->logException($action, $exception, $deliveryOrderRequest->getOrder());
 
             throw new DeliveryOrderRequestException($exception);
         }
