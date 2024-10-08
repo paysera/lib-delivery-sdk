@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Paysera\DeliverySdk\Entity;
 
-interface MerchantOrderPartyInterface
+use ArrayAccess;
+
+interface MerchantOrderPartyInterface extends ArrayAccess
 {
     public function getContact(): MerchantOrderContactInterface;
 

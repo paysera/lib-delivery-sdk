@@ -4,37 +4,28 @@ declare(strict_types=1);
 
 namespace Paysera\DeliverySdk\Client;
 
+use Closure;
 use Exception;
-use Paysera\DeliveryApi\MerchantClient\ClientFactory;
 use Paysera\DeliveryApi\MerchantClient\Entity\Order;
-use Paysera\DeliveryApi\MerchantClient\MerchantClient;
 use Paysera\DeliverySdk\Entity\MerchantOrderInterface;
 use Paysera\DeliverySdk\Entity\PayseraDeliveryOrderRequest;
 use Paysera\DeliverySdk\Exception\DeliveryOrderRequestException;
-use Paysera\DeliverySdk\Exception\MerchantClientNotFoundException;
-use Paysera\DeliverySdk\Facade\DeliveryOrderRequestAdapterFacade;
-use Paysera\DeliverySdk\Service\LoggerInterface;
+use Paysera\DeliverySdk\Service\DeliveryLoggerInterface;
 
 class DeliveryApiClient
 {
-    private const DEFAULT_BASE_URL = 'https://delivery-api.paysera.com/rest/v1/';
-
     public const ACTION_CREATE = 'create';
     public const ACTION_UPDATE = 'update';
+    public const ACTION_GET = 'get';
 
-    private const ORDER_REQUEST_HANDLERS = [
-        self::ACTION_CREATE => 'handleCreating',
-        self::ACTION_UPDATE => 'handleUpdating',
-    ];
-
-    private DeliveryOrderRequestAdapterFacade $orderRequestAdapter;
-    private LoggerInterface $logger;
+    private DeliveryOrderApiClient $orderRequestHandler;
+    private DeliveryLoggerInterface $logger;
 
     public function __construct(
-        DeliveryOrderRequestAdapterFacade $orderRequestAdapter,
-        LoggerInterface $logger
+        DeliveryOrderApiClient $orderRequestHandler,
+        DeliveryLoggerInterface $logger
     ) {
-        $this->orderRequestAdapter = $orderRequestAdapter;
+        $this->orderRequestHandler = $orderRequestHandler;
         $this->logger = $logger;
     }
 
@@ -42,99 +33,69 @@ class DeliveryApiClient
      * @param PayseraDeliveryOrderRequest $deliveryOrderRequest
      * @return Order
      * @throws DeliveryOrderRequestException
-     * @see self::handleCreating()
      */
-    public function sendOrderCreateRequest(PayseraDeliveryOrderRequest $deliveryOrderRequest): Order
+    public function postOrder(PayseraDeliveryOrderRequest $deliveryOrderRequest): Order
     {
-        return $this->sendOrderRequest(self::ACTION_CREATE, $deliveryOrderRequest);
+        return $this->sendOrderRequest(
+            self::ACTION_CREATE,
+            fn (PayseraDeliveryOrderRequest $deliveryOrderRequest) => $this
+                ->orderRequestHandler
+                ->create($deliveryOrderRequest),
+            $deliveryOrderRequest
+        );
     }
 
     /**
      * @param PayseraDeliveryOrderRequest $deliveryOrderRequest
      * @return Order
      * @throws DeliveryOrderRequestException
-     * @see self::handleUpdating()
      */
-    public function sendOrderUpdateRequest(PayseraDeliveryOrderRequest $deliveryOrderRequest): Order
+    public function patchOrder(PayseraDeliveryOrderRequest $deliveryOrderRequest): Order
     {
-        return $this->sendOrderRequest(self::ACTION_UPDATE, $deliveryOrderRequest);
+        return $this->sendOrderRequest(
+            self::ACTION_UPDATE,
+            fn (PayseraDeliveryOrderRequest $deliveryOrderRequest) => $this
+                ->orderRequestHandler
+                ->update($deliveryOrderRequest),
+            $deliveryOrderRequest
+        );
     }
 
-    # region handling
-
-    private function handleCreating(PayseraDeliveryOrderRequest $deliveryOrderRequest): Order
+    /**
+     * @param PayseraDeliveryOrderRequest $deliveryOrderRequest
+     * @return Order
+     * @throws DeliveryOrderRequestException
+     */
+    public function getOrder(PayseraDeliveryOrderRequest $deliveryOrderRequest): Order
     {
-        return $this
-            ->initMerchantClient($deliveryOrderRequest)
-            ->createOrder(
-                $this->orderRequestAdapter->convertCreate($deliveryOrderRequest)
-            )
-        ;
+        return $this->sendOrderRequest(
+            self::ACTION_GET,
+            fn (PayseraDeliveryOrderRequest $deliveryOrderRequest) => $this
+                ->orderRequestHandler
+                ->get($deliveryOrderRequest),
+            $deliveryOrderRequest
+        );
     }
-
-    private function handleUpdating(PayseraDeliveryOrderRequest $deliveryOrderRequest): Order
-    {
-        return $this
-            ->initMerchantClient($deliveryOrderRequest)
-            ->updateOrder(
-                $deliveryOrderRequest->getOrder()->getDeliverOrderNumber(),
-                $this->orderRequestAdapter->convertUpdate($deliveryOrderRequest)
-            )
-        ;
-    }
-
-    # endregion
 
     /**
      * @param string $action
+     * @param Closure $handler
      * @param PayseraDeliveryOrderRequest $deliveryOrderRequest
      * @return Order
      * @throws DeliveryOrderRequestException
      */
-    private function sendOrderRequest(string $action, PayseraDeliveryOrderRequest $deliveryOrderRequest): Order
-    {
+    private function sendOrderRequest(
+        string $action,
+        Closure $handler,
+        PayseraDeliveryOrderRequest $deliveryOrderRequest
+    ): Order {
         try {
-            return $this->{self::ORDER_REQUEST_HANDLERS[$action]}($deliveryOrderRequest);
+            return $handler($deliveryOrderRequest);
         } catch (Exception $exception) {
             $this->logException($action, $exception, $deliveryOrderRequest->getOrder());
 
             throw new DeliveryOrderRequestException($exception);
         }
-    }
-
-    private function initMerchantClient(PayseraDeliveryOrderRequest $deliveryOrderRequest): MerchantClient
-    {
-        $macId = $deliveryOrderRequest->getDeliverySettings()->getProjectId();
-        $macSecret = $deliveryOrderRequest->getDeliverySettings()->getProjectPassword();
-
-        if ($macId === null || $macSecret === null) {
-            throw new MerchantClientNotFoundException();
-        }
-
-        $clientFactory = new ClientFactory([
-            'base_url' => $this->getBaseUrl(),
-            'mac' => [
-                'mac_id' => $macId,
-                'mac_secret' => $macSecret,
-            ],
-        ]);
-
-        try {
-            $merchantClient = $clientFactory->getMerchantClient();
-        } catch (Exception $exception) {
-            $this->logger->error('Cannot create merchant client', $exception);
-
-            throw new MerchantClientNotFoundException();
-        }
-
-        return $merchantClient;
-    }
-
-    private function getBaseUrl(): string
-    {
-        $url = getenv('DELIVERY_API_URL');
-
-        return !empty($url) ? $url : self::DEFAULT_BASE_URL;
     }
 
     private function logException(string $action, Exception $exception, MerchantOrderInterface $order): void

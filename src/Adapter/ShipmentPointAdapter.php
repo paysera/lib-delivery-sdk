@@ -35,7 +35,7 @@ class ShipmentPointAdapter
 
         if ($partyDto->getTerminalLocationDto() !== null) {
             $shipmentPoint->setParcelMachineId(
-                $partyDto->getTerminalLocationDto()->getSelectedTerminalId()
+                $partyDto->getTerminalLocationDto()->getTerminalId()
             );
         }
 

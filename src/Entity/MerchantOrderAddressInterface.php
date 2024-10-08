@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Paysera\DeliverySdk\Entity;
 
-interface MerchantOrderAddressInterface
+use ArrayAccess;
+
+interface MerchantOrderAddressInterface extends ArrayAccess
 {
     public function setCountry(string $country): self;
 

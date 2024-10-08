@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace Paysera\DeliverySdk\Entity;
 
+use ArrayAccess;
 use Paysera\DeliverySdk\Collection\OrderItemsCollection;
 
-interface MerchantOrderInterface
+interface MerchantOrderInterface extends ArrayAccess
 {
     public function getNumber(): string;
 
@@ -25,4 +26,6 @@ interface MerchantOrderInterface
     public function getItems(): OrderItemsCollection;
 
     public function getNotificationCallback(): ?NotificationCallbackInterface;
+
+    public function jsonSerialize(): array;
 }
