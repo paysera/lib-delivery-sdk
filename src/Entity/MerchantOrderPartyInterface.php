@@ -12,5 +12,7 @@ interface MerchantOrderPartyInterface extends ArrayAccess
 
     public function getAddress(): MerchantOrderAddressInterface;
 
-    public function getTerminalLocationDto(): ?DeliveryTerminalLocationInterface;
+    public function setTerminalLocation(?DeliveryTerminalLocationInterface $terminalLocation): self;
+
+    public function getTerminalLocation(): ?DeliveryTerminalLocationInterface;
 }
