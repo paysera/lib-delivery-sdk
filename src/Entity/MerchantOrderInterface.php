@@ -10,7 +10,13 @@ interface MerchantOrderInterface
 {
     public function getNumber(): string;
 
+    public function getDeliverOrderId(): string;
+
     public function getDeliverOrderNumber(): string;
+
+    public function setDeliverOrderId(string $id): self;
+
+    public function setDeliverOrderNumber(string $number): self;
 
     public function getShipping(): MerchantOrderPartyInterface;
 
