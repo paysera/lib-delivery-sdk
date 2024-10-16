@@ -15,9 +15,9 @@ use Paysera\DeliverySdk\Exception\DeliveryGatewayNotFoundException;
 use Paysera\DeliverySdk\Exception\DeliveryOrderRequestException;
 use Paysera\DeliverySdk\Repository\DeliveryGatewayRepositoryInterface;
 use Paysera\DeliverySdk\Repository\MerchantOrderRepositoryInterface;
-use Paysera\DeliverySdk\Utils\DeliveryGatewayUtils;
+use Paysera\DeliverySdk\Util\DeliveryGatewayUtils;
 
-class PayseraDeliveryOrderCallbackService
+class DeliveryOrderCallbackService
 {
     private DeliveryApiClient $apiClient;
     private MerchantOrderRepositoryInterface $merchantOrderRepository;
@@ -43,6 +43,7 @@ class PayseraDeliveryOrderCallbackService
      * @param PayseraDeliveryOrderRequest $deliveryOrderRequest
      * @return MerchantOrderInterface
      * @throws DeliveryOrderRequestException
+     * @throws DeliveryGatewayNotFoundException
      */
     public function updateMerchantOrder(PayseraDeliveryOrderRequest $deliveryOrderRequest): MerchantOrderInterface
     {

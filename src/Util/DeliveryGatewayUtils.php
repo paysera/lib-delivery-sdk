@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Paysera\DeliverySdk\Utils;
+namespace Paysera\DeliverySdk\Util;
 
 use Paysera\DeliveryApi\MerchantClient\Entity\Order;
 use Paysera\DeliverySdk\Entity\PayseraDeliveryGatewaySettingsInterface;

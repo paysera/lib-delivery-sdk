@@ -5,11 +5,8 @@ declare(strict_types=1);
 namespace Paysera\DeliverySdk\Adapter;
 
 use Paysera\DeliveryApi\MerchantClient\Entity\OrderCreate;
-use Paysera\DeliveryApi\MerchantClient\Entity\OrderUpdate;
 use Paysera\DeliverySdk\Entity\PayseraDeliveryOrderRequest;
-use Paysera\DeliverySdk\Utils\DeliveryGatewayUtils;
-use Paysera\Dto\EshopOrderDto;
-use Paysera\DeliverySdk\Entity\MerchantOrderInterface;
+use Paysera\DeliverySdk\Util\DeliveryGatewayUtils;
 
 class OrderCreateRequestAdapter
 {

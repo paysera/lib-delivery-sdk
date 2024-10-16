@@ -11,7 +11,7 @@ use Paysera\DeliverySdk\Entity\PayseraDeliveryOrderRequest;
 use Paysera\DeliverySdk\Exception\DeliveryOrderRequestException;
 use Paysera\DeliverySdk\Repository\MerchantOrderRepositoryInterface;
 
-class PayseraDeliveryOrderService
+class DeliveryOrderService
 {
     private const LOG_MESSAGE_STARTED = 'Attempting to perform operation \'%s\' of delivery order for order id %s with project id: %s';
     private const LOG_MESSAGE_COMPLETED = 'Operation \'%s\' of delivery order %s for order id %d is completed.';
