@@ -2,12 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Paysera\DeliverySdk\Facade;
+namespace Paysera\DeliverySdk\Adapter;
 
 use Paysera\DeliveryApi\MerchantClient\Entity\OrderCreate;
 use Paysera\DeliveryApi\MerchantClient\Entity\OrderUpdate;
-use Paysera\DeliverySdk\Adapter\OrderCreateRequestAdapter;
-use Paysera\DeliverySdk\Adapter\OrderUpdateRequestAdapter;
 use Paysera\DeliverySdk\Entity\PayseraDeliveryOrderRequest;
 
 class DeliveryOrderRequestAdapterFacade

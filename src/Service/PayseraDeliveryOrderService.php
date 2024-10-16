@@ -18,12 +18,12 @@ class PayseraDeliveryOrderService
 
     private MerchantOrderRepositoryInterface $merchantOrderRepository;
     private DeliveryApiClient $deliveryApiClient;
-    private LoggerInterface $logger;
+    private DeliveryLoggerInterface $logger;
 
     public function __construct(
         MerchantOrderRepositoryInterface $merchantOrderRepository,
         DeliveryApiClient $deliveryApiClient,
-        LoggerInterface $logger
+        DeliveryLoggerInterface $logger
     ) {
         $this->deliveryApiClient = $deliveryApiClient;
         $this->logger = $logger;
@@ -52,7 +52,7 @@ class PayseraDeliveryOrderService
     public function updateDeliveryOrder(PayseraDeliveryOrderRequest $deliveryOrderRequest): ?MerchantOrderInterface
     {
         $this->logStepStarted(DeliveryApiClient::ACTION_UPDATE, $deliveryOrderRequest);
-        $deliveryOrder = $this->deliveryApiClient->sendOrderUpdateRequest($deliveryOrderRequest);
+        $deliveryOrder = $this->deliveryApiClient->patchOrder($deliveryOrderRequest);
         $this->logStepCompleted(DeliveryApiClient::ACTION_UPDATE, $deliveryOrderRequest, $deliveryOrder);
 
         return $deliveryOrderRequest->getOrder();
@@ -68,7 +68,7 @@ class PayseraDeliveryOrderService
     private function handleCreating(PayseraDeliveryOrderRequest $deliveryOrderRequest): Order
     {
         $order = $deliveryOrderRequest->getOrder();
-        $deliveryOrder = $this->deliveryApiClient->sendOrderCreateRequest($deliveryOrderRequest);
+        $deliveryOrder = $this->deliveryApiClient->postOrder($deliveryOrderRequest);
 
         $order->setDeliverOrderId($deliveryOrder->getId());
         $order->setDeliverOrderNumber($deliveryOrder->getNumber());

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Paysera\DeliverySdk\Utils;
 
+use Paysera\DeliveryApi\MerchantClient\Entity\Order;
 use Paysera\DeliverySdk\Entity\PayseraDeliveryGatewaySettingsInterface;
 use Paysera\DeliverySdk\Entity\PayseraDeliverySettingsInterface;
 
@@ -34,6 +35,22 @@ class DeliveryGatewayUtils
             '%s2%s',
             $deliveryGatewaySettings->getSenderType(),
             $deliveryGatewaySettings->getReceiverType()
+        );
+    }
+
+    public static function getGatewayCodeFromDeliveryOrder(Order $order): string
+    {
+        $receiverCode = $order->getShipmentMethod()->getReceiverCode();
+        $shipmentMethodCode = PayseraDeliverySettingsInterface::TYPE_COURIER;
+
+        if ($receiverCode === PayseraDeliverySettingsInterface::TYPE_PARCEL_MACHINE) {
+            $shipmentMethodCode = PayseraDeliverySettingsInterface::TYPE_TERMINALS;
+        }
+
+        return sprintf(
+            '%s_%s',
+            $order->getShipmentGateway()->getCode(),
+            $shipmentMethodCode
         );
     }
 }

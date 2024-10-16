@@ -33,9 +33,9 @@ class ShipmentPointAdapter
             ->setContact($contact)
         ;
 
-        if ($partyDto->getTerminalLocationDto() !== null) {
+        if ($partyDto->getTerminalLocation() !== null) {
             $shipmentPoint->setParcelMachineId(
-                $partyDto->getTerminalLocationDto()->getSelectedTerminalId()
+                $partyDto->getTerminalLocation()->getTerminalId()
             );
         }
 

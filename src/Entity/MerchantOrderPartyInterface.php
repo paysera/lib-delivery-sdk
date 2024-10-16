@@ -4,11 +4,15 @@ declare(strict_types=1);
 
 namespace Paysera\DeliverySdk\Entity;
 
-interface MerchantOrderPartyInterface
+use ArrayAccess;
+
+interface MerchantOrderPartyInterface extends ArrayAccess
 {
     public function getContact(): MerchantOrderContactInterface;
 
     public function getAddress(): MerchantOrderAddressInterface;
 
-    public function getTerminalLocationDto(): ?DeliveryTerminalLocationInterface;
+    public function setTerminalLocation(?DeliveryTerminalLocationInterface $terminalLocation): self;
+
+    public function getTerminalLocation(): ?DeliveryTerminalLocationInterface;
 }

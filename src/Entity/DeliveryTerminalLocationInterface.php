@@ -4,13 +4,23 @@ declare(strict_types=1);
 
 namespace Paysera\DeliverySdk\Entity;
 
-interface DeliveryTerminalLocationInterface
+use ArrayAccess;
+
+interface DeliveryTerminalLocationInterface extends ArrayAccess
 {
-    public function getCountryCode(): string;
+    public function setCountry(string $country): self;
+
+    public function getCountry(): string;
+
+    public function setCity(string $city): self;
 
     public function getCity(): string;
 
-    public function getSelectedTerminalId(): string;
+    public function setTerminalId(string $terminalId): self;
+
+    public function getTerminalId(): string;
+
+    public function setDeliveryGatewayCode(string $gatewayCode): self;
 
     public function getDeliveryGatewayCode(): string;
 }

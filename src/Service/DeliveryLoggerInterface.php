@@ -6,7 +6,7 @@ namespace Paysera\DeliverySdk\Service;
 
 use Exception;
 
-interface LoggerInterface
+interface DeliveryLoggerInterface
 {
     public function info(string $message): void;
 
