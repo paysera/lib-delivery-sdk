@@ -10,7 +10,7 @@ use Paysera\DeliverySdk\Entity\PayseraDeliverySettingsInterface;
 
 class DeliveryGatewayUtils
 {
-    public static function resolveDeliveryGatewayCode(string $deliveryGatewayCode): string
+    public function resolveDeliveryGatewayCode(string $deliveryGatewayCode): string
     {
         $lastDelimPosition = strripos($deliveryGatewayCode, ':');
 
@@ -28,7 +28,7 @@ class DeliveryGatewayUtils
         );
     }
 
-    public static function getShipmentMethodCode(
+    public function getShipmentMethodCode(
         PayseraDeliveryGatewaySettingsInterface $deliveryGatewaySettings
     ): string {
         return sprintf(

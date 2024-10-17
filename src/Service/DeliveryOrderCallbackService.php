@@ -24,19 +24,22 @@ class DeliveryOrderCallbackService
     private ObjectStateService $objectStateService;
     private MerchantOrderLoggerInterface $merchantOrderLogger;
     private DeliveryGatewayRepositoryInterface $deliveryGatewayRepository;
+    private DeliveryGatewayUtils $gatewayUtils;
 
     public function __construct(
         DeliveryApiClient $apiClient,
         ObjectStateService $objectStateService,
         MerchantOrderRepositoryInterface $merchantOrderRepository,
         MerchantOrderLoggerInterface $merchantOrderLogger,
-        DeliveryGatewayRepositoryInterface $deliveryGatewayRepository
+        DeliveryGatewayRepositoryInterface $deliveryGatewayRepository,
+        DeliveryGatewayUtils $gatewayUtils
     ) {
         $this->apiClient = $apiClient;
         $this->merchantOrderRepository = $merchantOrderRepository;
         $this->objectStateService = $objectStateService;
         $this->merchantOrderLogger = $merchantOrderLogger;
         $this->deliveryGatewayRepository = $deliveryGatewayRepository;
+        $this->gatewayUtils = $gatewayUtils;
     }
 
     /**
@@ -107,7 +110,7 @@ class DeliveryOrderCallbackService
 
     private function updateDeliveryGateway(MerchantOrderInterface $merchantOrder, Order $deliveryOrder): void
     {
-        $gatewayCode = DeliveryGatewayUtils::getGatewayCodeFromDeliveryOrder($deliveryOrder);
+        $gatewayCode = $this->gatewayUtils->getGatewayCodeFromDeliveryOrder($deliveryOrder);
         $deliveryGateway = $this->deliveryGatewayRepository->findPayseraGateway($gatewayCode);
 
         if ($deliveryGateway === null) {

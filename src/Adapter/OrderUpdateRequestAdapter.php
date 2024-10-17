@@ -13,15 +13,18 @@ class OrderUpdateRequestAdapter
     private ShipmentsAdapter $shipmentsAdapter;
     private OrderNotificationAdapter $notificationCallbackAdapter;
     private ShipmentPointAdapter $shipmentPointAdapter;
+    private DeliveryGatewayUtils $gatewayUtils;
 
     public function __construct(
         ShipmentsAdapter $shipmentsAdapter,
         OrderNotificationAdapter $notificationCallbackAdapter,
-        ShipmentPointAdapter $shipmentPointAdapter
+        ShipmentPointAdapter $shipmentPointAdapter,
+        DeliveryGatewayUtils $gatewayUtils
     ) {
         $this->shipmentsAdapter = $shipmentsAdapter;
         $this->notificationCallbackAdapter = $notificationCallbackAdapter;
         $this->shipmentPointAdapter = $shipmentPointAdapter;
+        $this->gatewayUtils = $gatewayUtils;
     }
 
     public function convert(PayseraDeliveryOrderRequest $request): OrderUpdate
@@ -30,12 +33,12 @@ class OrderUpdateRequestAdapter
 
         $order = (new OrderUpdate())
             ->setShipmentGatewayCode(
-                DeliveryGatewayUtils::resolveDeliveryGatewayCode($request->getDeliveryGatewayCode())
+                $this->gatewayUtils->resolveDeliveryGatewayCode($request->getDeliveryGatewayCode())
             )
             ->setShipmentMethodCode(
-                DeliveryGatewayUtils::getShipmentMethodCode($request->getDeliveryGatewaySettings())
+                $this->gatewayUtils->getShipmentMethodCode($request->getDeliveryGatewaySettings())
             )
-            ->setShipments([...$this->shipmentsAdapter->adapt($orderDto->getItems())])
+            ->setShipments([...$this->shipmentsAdapter->convert($orderDto->getItems())])
             ->setReceiver($this->shipmentPointAdapter->convert($orderDto->getShipping()))
             ->setEshopOrderId($orderDto->getNumber())
         ;

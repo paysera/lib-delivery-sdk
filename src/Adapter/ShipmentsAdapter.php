@@ -13,7 +13,7 @@ class ShipmentsAdapter
      * @param OrderItemsCollection $items
      * @return iterable<ShipmentCreate>
      */
-    public function adapt(OrderItemsCollection $items): iterable
+    public function convert(OrderItemsCollection $items): iterable
     {
         foreach ($items as $item) {
             yield (new ShipmentCreate())
