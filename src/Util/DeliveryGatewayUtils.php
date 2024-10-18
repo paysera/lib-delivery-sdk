@@ -19,7 +19,7 @@ class DeliveryGatewayUtils
                 '_' . PayseraDeliverySettingsInterface::TYPE_COURIER,
                 '_' . PayseraDeliverySettingsInterface::TYPE_PARCEL_MACHINE,
                 '_' . PayseraDeliverySettingsInterface::TYPE_TERMINALS,
-                PayseraDeliverySettingsInterface::DELIVERY_GATEWAY_PREFIX
+                PayseraDeliverySettingsInterface::DELIVERY_GATEWAY_PREFIX,
             ],
             '',
             $lastDelimPosition

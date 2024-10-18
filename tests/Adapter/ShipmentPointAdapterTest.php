@@ -75,12 +75,12 @@ class ShipmentPointAdapterTest extends TestCase
 
         yield 'with terminal location' => [
             'terminalLocation' => $terminalLocation,
-            'expectedParcelMachineId' => 'T123'
+            'expectedParcelMachineId' => 'T123',
         ];
 
         yield 'without terminal location' => [
             'terminalLocation' => null,
-            'expectedParcelMachineId' => null
+            'expectedParcelMachineId' => null,
         ];
     }
 }

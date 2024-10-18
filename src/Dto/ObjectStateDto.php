@@ -8,7 +8,8 @@ class ObjectStateDto
 {
     private array $state;
 
-    public function __construct(array $state) {
+    public function __construct(array $state)
+    {
         $this->state = $state;
     }
 

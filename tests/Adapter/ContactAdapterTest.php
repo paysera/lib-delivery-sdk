@@ -54,7 +54,7 @@ class ContactAdapterTest extends TestCase
                 'title' => 'John Doe Acme Corp',
                 'email' => 'john.doe@example.com',
                 'phone' => '+1234567890',
-            ]
+            ],
         ];
 
         yield 'contact without company' => [
@@ -69,7 +69,7 @@ class ContactAdapterTest extends TestCase
                 'title' => 'Jane Smith',
                 'email' => 'jane.smith@example.com',
                 'phone' => '+0987654321',
-            ]
+            ],
         ];
 
         yield 'contact without last name' => [
@@ -84,7 +84,7 @@ class ContactAdapterTest extends TestCase
                 'title' => 'Alex Innovate Ltd',
                 'email' => 'alex@innovate.com',
                 'phone' => '+1122334455',
-            ]
+            ],
         ];
     }
 }
