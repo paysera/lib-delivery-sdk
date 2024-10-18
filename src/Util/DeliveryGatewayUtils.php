@@ -38,7 +38,7 @@ class DeliveryGatewayUtils
         );
     }
 
-    public static function getGatewayCodeFromDeliveryOrder(Order $order): string
+    public function getGatewayCodeFromDeliveryOrder(Order $order): string
     {
         $receiverCode = $order->getShipmentMethod()->getReceiverCode();
         $shipmentMethodCode = PayseraDeliverySettingsInterface::TYPE_COURIER;

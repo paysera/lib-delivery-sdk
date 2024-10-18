@@ -12,6 +12,13 @@ use Psr\Container\NotFoundExceptionInterface;
 
 class DeliveryFacadeFactory
 {
+    private Container $container;
+
+    public function __construct(Container $container)
+    {
+        $this->container = $container;
+    }
+
     /**
      * @return DeliveryFacade
      * @throws ContainerExceptionInterface
@@ -19,11 +26,11 @@ class DeliveryFacadeFactory
      */
     public function create(): DeliveryFacade
     {
-        $container = new Container();
+        $container = $container ?? new Container();
 
         return new DeliveryFacade(
-            $container->get(DeliveryOrderService::class),
-            $container->get(DeliveryOrderCallbackService::class)
+            $this->container->get(DeliveryOrderService::class),
+            $this->container->get(DeliveryOrderCallbackService::class)
         );
     }
 }

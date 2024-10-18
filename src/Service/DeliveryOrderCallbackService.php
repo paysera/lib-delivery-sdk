@@ -141,6 +141,8 @@ class DeliveryOrderCallbackService
         } else {
             $merchantOrder->getShipping()->setTerminalLocation(null);
         }
+
+        $this->merchantOrderRepository->save($merchantOrder);
     }
 
     private function updateParcelMachine(
