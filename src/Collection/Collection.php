@@ -17,8 +17,15 @@ abstract class Collection implements Iterator, Countable
 {
     private int $position;
 
+    /**
+     * @var array<ItemInterface>
+     */
     private array $array;
 
+    /**
+     * @param array<ItemInterface> $array
+     * @throws InvalidTypeException
+     */
     public function __construct(array $array = [])
     {
         $this->position = 0;
@@ -63,6 +70,7 @@ abstract class Collection implements Iterator, Countable
      * Returns new collection instance with filtered items.
      * @param callable $filterFunction
      * @return Collection<ItemInterface>
+     * @throws InvalidTypeException
      */
     public function filter(callable $filterFunction): Collection
     {
@@ -71,6 +79,11 @@ abstract class Collection implements Iterator, Countable
         return new static(array_values($filteredArray));
     }
 
+    /**
+     * @param array<ItemInterface> $array
+     * @return void
+     * @throws InvalidTypeException
+     */
     public function exchangeArray(array $array): void
     {
         $isCompatible = array_reduce($array, fn ($carry, $item) => $carry && $this->isCompatible($item), true);

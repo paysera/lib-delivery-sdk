@@ -7,6 +7,7 @@ namespace Paysera\DeliverySdk\Util;
 use Paysera\DeliveryApi\MerchantClient\Entity\Order;
 use Paysera\DeliverySdk\Entity\PayseraDeliveryGatewaySettingsInterface;
 use Paysera\DeliverySdk\Entity\PayseraDeliverySettingsInterface;
+use Paysera\DeliverySdk\Exception\UndefinedDeliveryGatewayException;
 
 class DeliveryGatewayUtils
 {
@@ -38,9 +39,16 @@ class DeliveryGatewayUtils
         );
     }
 
-    public function getGatewayCodeFromDeliveryOrder(Order $order): string
+    public function getGatewayCodeFromDeliveryOrder(Order $order): ?string
     {
-        $receiverCode = $order->getShipmentMethod()->getReceiverCode();
+        $shippingMethod = $order->getShipmentMethod();
+        $shippingGateway = $order->getShipmentGateway();
+
+        if ($shippingMethod === null || $shippingGateway === null) {
+            return null;
+        }
+
+        $receiverCode = $shippingMethod->getReceiverCode();
         $shipmentMethodCode = PayseraDeliverySettingsInterface::TYPE_COURIER;
 
         if ($receiverCode === PayseraDeliverySettingsInterface::TYPE_PARCEL_MACHINE) {
@@ -49,7 +57,7 @@ class DeliveryGatewayUtils
 
         return sprintf(
             '%s_%s',
-            $order->getShipmentGateway()->getCode(),
+            $shippingGateway->getCode(),
             $shipmentMethodCode
         );
     }

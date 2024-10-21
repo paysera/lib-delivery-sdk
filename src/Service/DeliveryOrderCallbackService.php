@@ -13,6 +13,7 @@ use Paysera\DeliverySdk\Entity\PayseraDeliverySettingsInterface;
 use Paysera\DeliverySdk\Entity\TerminalLocation;
 use Paysera\DeliverySdk\Exception\DeliveryGatewayNotFoundException;
 use Paysera\DeliverySdk\Exception\DeliveryOrderRequestException;
+use Paysera\DeliverySdk\Exception\UndefinedDeliveryGatewayException;
 use Paysera\DeliverySdk\Repository\DeliveryGatewayRepositoryInterface;
 use Paysera\DeliverySdk\Repository\MerchantOrderRepositoryInterface;
 use Paysera\DeliverySdk\Util\DeliveryGatewayUtils;
@@ -112,6 +113,11 @@ class DeliveryOrderCallbackService
     private function updateDeliveryGateway(MerchantOrderInterface $merchantOrder, Order $deliveryOrder): void
     {
         $gatewayCode = $this->gatewayUtils->getGatewayCodeFromDeliveryOrder($deliveryOrder);
+
+        if ($gatewayCode === null) {
+            throw new UndefinedDeliveryGatewayException();
+        }
+
         $deliveryGateway = $this->deliveryGatewayRepository->findPayseraGateway($gatewayCode);
 
         if ($deliveryGateway === null) {
@@ -151,7 +157,13 @@ class DeliveryOrderCallbackService
         Order $deliveryOrder,
         string $newDeliveryGatewayCode
     ): void {
-        $parcelMachine = $deliveryOrder->getReceiver()->getParcelMachine();
+        $receiver = $deliveryOrder->getReceiver();
+
+        if ($receiver === null) {
+            return;
+        }
+
+        $parcelMachine = $receiver->getParcelMachine();
 
         if ($parcelMachine === null) {
             return;
@@ -161,7 +173,7 @@ class DeliveryOrderCallbackService
 
         $newTerminalLocation = (new TerminalLocation())
             ->setCountry($address->getCountry())
-            ->setCity($address->getCity())
+            ->setCity((string)$address->getCity())
             ->setTerminalId($parcelMachine->getId())
             ->setDeliveryGatewayCode($newDeliveryGatewayCode)
         ;
