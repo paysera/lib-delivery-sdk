@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Paysera\DeliverySdk\Util;
 
 use Exception;
-use Paysera\DeliverySdk\Exception\ContainerException;
+use Paysera\DeliverySdk\Exception\ContainerCreationFaultException;
 use Paysera\DeliverySdk\Exception\ContainerNotFoundException;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
@@ -54,7 +54,7 @@ class Container implements ContainerInterface
     /**
      * @param string $id
      * @return object
-     * @throws ContainerException
+     * @throws ContainerCreationFaultException
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */
@@ -63,7 +63,7 @@ class Container implements ContainerInterface
         try {
             $instance = $this->createInstance($id);
         } catch (ReflectionException $exception) {
-            throw new ContainerException("Class $id has instantiable issues.");
+            throw new ContainerCreationFaultException("Class $id has instantiable issues.");
         }
 
         return $instance;
@@ -81,7 +81,7 @@ class Container implements ContainerInterface
         $reflector = new ReflectionClass($className);
 
         if (!$reflector->isInstantiable()) {
-            throw new ContainerException("Class $className is not instantiable");
+            throw new ContainerCreationFaultException("Class $className is not instantiable");
         }
 
         $constructor = $reflector->getConstructor();
@@ -98,7 +98,7 @@ class Container implements ContainerInterface
     /**
      * @param ReflectionParameter[] $constructorParameters
      * @return array
-     * @throws ContainerException
+     * @throws ContainerCreationFaultException
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */
@@ -114,7 +114,7 @@ class Container implements ContainerInterface
                 if ($constructorParameter->isDefaultValueAvailable()) {
                     $dependencies[] = $constructorParameter->getDefaultValue();
                 } else {
-                    throw new ContainerException("Can not resolve class dependency $constructorParameter->name");
+                    throw new ContainerCreationFaultException("Can not resolve class dependency $constructorParameter->name");
                 }
             } else {
                 $dependencies[] = $this->get($type->getName());

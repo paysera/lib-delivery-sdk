@@ -52,7 +52,7 @@ class ObjectStateService
     private function getFieldData(string $path, ArrayAccess $object)
     {
         $path = explode('.', $path);
-        $lastItemKey = count($path) - 1;
+        $lastItemKey = array_key_last($path);
         $currentLevel = $object;
 
         foreach ($path as $key => $item) {
@@ -77,7 +77,7 @@ class ObjectStateService
     private function setFieldData(string $path, ArrayAccess $object, $data): void
     {
         $path = explode('.', $path);
-        $lastItemKey = count($path) - 1;
+        $lastItemKey = array_key_last($path);
         $currentLevel = $object;
 
         foreach ($path as $key => $item) {

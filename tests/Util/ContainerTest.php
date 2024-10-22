@@ -8,7 +8,7 @@ use Iterator;
 use Mockery as m;
 use Mockery\Adapter\Phpunit\MockeryTestCase;
 use Paysera\DeliverySdk\Exception\BaseException;
-use Paysera\DeliverySdk\Exception\ContainerException;
+use Paysera\DeliverySdk\Exception\ContainerCreationFaultException;
 use Paysera\DeliverySdk\Exception\ContainerNotFoundException;
 use Paysera\DeliverySdk\Tests\Fixtures\ClassWithNotTypedArgument;
 use Paysera\DeliverySdk\Tests\Fixtures\ClassWithNotTypedArgumentHasDefaultValue;
@@ -80,23 +80,23 @@ class ContainerTest extends MockeryTestCase
 
     public function testBuildClassDoesNotExistException(): void
     {
-        $this->expectException(ContainerException::class);
-        $this->expectExceptionCode(BaseException::E_CONTAINER);
+        $this->expectException(ContainerCreationFaultException::class);
+        $this->expectExceptionCode(BaseException::E_CONTAINER_CREATION_FAULT);
 
         $this->container->build('test');
     }
 
     public function testBuildClassIsNotInstantiableException(): void
     {
-        $this->expectException(ContainerException::class);
-        $this->expectExceptionCode(BaseException::E_CONTAINER);
+        $this->expectException(ContainerCreationFaultException::class);
+        $this->expectExceptionCode(BaseException::E_CONTAINER_CREATION_FAULT);
 
         $this->container->build(Iterator::class);
     }
 
     public function testBuildWithConstructorArgumentsWithoutType(): void
     {
-        $this->expectException(ContainerException::class);
+        $this->expectException(ContainerCreationFaultException::class);
         $this->expectExceptionMessage('Can not resolve class dependency input');
 
         $this->container->build(ClassWithNotTypedArgument::class);
