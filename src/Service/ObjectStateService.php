@@ -27,6 +27,19 @@ class ObjectStateService
         }
     }
 
+    public function transformState(ObjectStateDto $stateDto, array $keyMap = null): ObjectStateDto
+    {
+        $newState = [];
+
+        foreach ($stateDto->getState() as $fieldPath => $value) {
+            if (isset($keyMap[$fieldPath])) {
+                $newState[$keyMap[$fieldPath]] = $value;
+            }
+        }
+
+        return new ObjectStateDto($newState);
+    }
+
     public function diffState(ObjectStateDto $left, ObjectStateDto $right, ?array $keyMap = null): ObjectStateDto
     {
         $leftData = $left->getState();

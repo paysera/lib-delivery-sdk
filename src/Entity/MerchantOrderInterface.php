@@ -11,13 +11,13 @@ interface MerchantOrderInterface extends ArrayAccess
 {
     public function getNumber(): string;
 
-    public function getDeliverOrderId(): string;
+    public function getDeliveryOrderId(): string;
 
-    public function getDeliverOrderNumber(): string;
+    public function getDeliveryOrderNumber(): string;
 
-    public function setDeliverOrderId(string $id): self;
+    public function setDeliveryOrderId(string $id): self;
 
-    public function setDeliverOrderNumber(string $number): self;
+    public function setDeliveryOrderNumber(string $number): self;
 
     public function getShipping(): MerchantOrderPartyInterface;
 

@@ -44,7 +44,7 @@ class DeliveryOrderApiClient
             ->merchantClientProvider
             ->getMerchantClient($deliveryOrderRequest->getDeliverySettings())
             ->updateOrder(
-                $deliveryOrderRequest->getOrder()->getDeliverOrderNumber(),
+                $deliveryOrderRequest->getOrder()->getDeliveryOrderNumber(),
                 $this->orderRequestAdapter->convertUpdate($deliveryOrderRequest)
             )
         ;
@@ -56,7 +56,7 @@ class DeliveryOrderApiClient
             ->merchantClientProvider
             ->getMerchantClient($deliveryOrderRequest->getDeliverySettings())
             ->getOrder(
-                $deliveryOrderRequest->getOrder()->getDeliverOrderId()
+                $deliveryOrderRequest->getOrder()->getDeliveryOrderId()
             )
         ;
     }

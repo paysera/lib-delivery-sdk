@@ -39,13 +39,14 @@ class DeliveryOrderCallbackServiceTest extends TestCase
     private ObjectStateService $objectStateService;
     private DeliveryGatewayRepositoryInterface $deliveryGatewayRepository;
     private DeliveryGatewayUtils $gatewayUtils;
+    private MerchantOrderLoggerInterface $merchantOrderLogger;
 
     protected function setUp(): void
     {
         $this->apiClient = $this->createMock(DeliveryApiClient::class);
         $this->merchantOrderRepository = $this->createMock(MerchantOrderRepositoryInterface::class);
         $this->objectStateService = $this->createMock(ObjectStateService::class);
-        $merchantOrderLogger = $this->createMock(MerchantOrderLoggerInterface::class);
+        $this->merchantOrderLogger = $this->createMock(MerchantOrderLoggerInterface::class);
         $this->deliveryGatewayRepository = $this->createMock(DeliveryGatewayRepositoryInterface::class);
         $this->gatewayUtils = $this->createMock(DeliveryGatewayUtils::class);
 
@@ -53,7 +54,7 @@ class DeliveryOrderCallbackServiceTest extends TestCase
             $this->apiClient,
             $this->objectStateService,
             $this->merchantOrderRepository,
-            $merchantOrderLogger,
+            $this->merchantOrderLogger,
             $this->deliveryGatewayRepository,
             $this->gatewayUtils
         );
@@ -71,51 +72,91 @@ class DeliveryOrderCallbackServiceTest extends TestCase
         $merchantOrder = $this->mockMerchantOrder();
         $deliveryOrderRequest->method('getOrder')->willReturn($merchantOrder);
 
-        $diffState = $this->createMock(ObjectStateDto::class);
-        $diffState->method('getState')->willReturn(
-            [
-                'contact.phone' => 'old_phone',
-                'contact.email' => 'old@email',
-                'address.country' => 'OldCountry',
-                'address.city' => 'OldCity',
-                'address.street' => 'OldStreet',
-                'address.postalCode' => '05566',
-                'address.houseNumber' => '1223',
-            ]
-        );
+        $newState = [
+            'party.phone' => 'new_phone',
+            'party.email' => 'new@email',
+            'address.country' => 'NewCountry',
+            'address.city' => 'NewCity',
+            'address.street' => 'NewStreet',
+            'address.postalCode' => '06677',
+            'address.houseNumber' => '2334',
+        ];
 
-        $this->objectStateService->expects($this->exactly(2))
+        $transformedState = [
+            'contact.phone' => 'new_phone',
+            'contact.email' => 'new@email',
+            'address.country' => 'NewCountry',
+            'address.city' => 'NewCity',
+            'address.street' => 'NewStreet',
+            'address.postalCode' => '06677',
+            'address.houseNumber' => '2334',
+        ];
+
+        $oldState = [
+            'contact.phone' => 'old_phone',
+            'contact.email' => 'old@email',
+            'address.country' => 'OldCountry',
+            'address.city' => 'OldCity',
+            'address.street' => 'OldStreet',
+            'address.postalCode' => '05566',
+            'address.houseNumber' => '1223',
+        ];
+
+        $diffState = $this->createMock(ObjectStateDto::class);
+        $diffState->method('getState')->willReturn($newState);
+
+        $this->objectStateService
+            ->expects($this->exactly(2))
             ->method('getState')
             ->willReturnCallback(
-                function (ArrayAccess $sourceObject) use ($deliveryOrderMock, $merchantOrder) {
+                function (ArrayAccess $sourceObject)
+                use (
+                    $deliveryOrderMock,
+                    $merchantOrder,
+                    $oldState,
+                    $newState
+                ) {
                     switch ($sourceObject) {
                         case $deliveryOrderMock->getReceiver()->getContact():
-                            return new ObjectStateDto(
-                                [
-                                    'party.phone' => 'new_phone',
-                                    'party.email' => 'new@email',
-                                    'address.country' => 'NewCountry',
-                                    'address.city' => 'NewCity',
-                                    'address.street' => 'NewStreet',
-                                    'address.postalCode' => '06677',
-                                    'address.houseNumber' => '2334',
-                                ]
-                            );
+                            return new ObjectStateDto($newState);
                         case $merchantOrder->getShipping():
-                            return new ObjectStateDto(
-                                [
-                                    'contact.phone' => 'old_phone',
-                                    'contact.email' => 'old@email',
-                                    'address.country' => 'OldCountry',
-                                    'address.city' => 'OldCity',
-                                    'address.street' => 'OldStreet',
-                                    'address.postalCode' => '05566',
-                                    'address.houseNumber' => '1223',
-                                ]
-                            );
+                            return new ObjectStateDto($oldState);
                     }
                 }
-            );
+            )
+        ;
+
+        $this->objectStateService
+            ->expects($this->once())
+            ->method('transformState')
+            ->willReturn(new ObjectStateDto($transformedState))
+        ;
+
+        $this->merchantOrderLogger
+            ->expects($this->once())
+            ->method('logShippingChanges')
+            ->with(
+                $merchantOrder,
+                [
+                    'shipping.contact.phone' => 'new_phone',
+                    'shipping.contact.email' => 'new@email',
+                    'shipping.address.country' => 'NewCountry',
+                    'shipping.address.city' => 'NewCity',
+                    'shipping.address.street' => 'NewStreet',
+                    'shipping.address.postalCode' => '06677',
+                    'shipping.address.houseNumber' => '2334',
+                ],
+                [
+                    'shipping.contact.phone' => 'old_phone',
+                    'shipping.contact.email' => 'old@email',
+                    'shipping.address.country' => 'OldCountry',
+                    'shipping.address.city' => 'OldCity',
+                    'shipping.address.street' => 'OldStreet',
+                    'shipping.address.postalCode' => '05566',
+                    'shipping.address.houseNumber' => '1223',
+                ],
+            )
+        ;
 
         $this->objectStateService->method('diffState')->willReturn($diffState);
         $this->merchantOrderRepository->expects($this->once())->method('save')->with($merchantOrder);
@@ -127,7 +168,7 @@ class DeliveryOrderCallbackServiceTest extends TestCase
     public function testUpdateMerchantOrderUpdatesDeliveryGateway(): void
     {
         /** @var MerchantOrderInterface|MockObject $merchantOrder */
-        $merchantOrder = $this->mockMerchantOrder();
+        $merchantOrder = $this->mockMerchantOrderWithTerminal();
         $merchantDeliveryGateway = $this->createMock(PayseraDeliveryGatewayInterface::class);
         $merchantDeliveryGateway->method('getCode')->willReturn('fedex');
         $merchantDeliveryGateway->method('getName')->willReturn('FedEx Terminal');
@@ -144,12 +185,21 @@ class DeliveryOrderCallbackServiceTest extends TestCase
 
         $deliveryOrderRequest = $this->createMock(PayseraDeliveryOrderRequest::class);
 
+        $this->merchantOrderLogger
+            ->expects($this->once())
+            ->method('logDeliveryTerminalLocationChanges')
+        ;
+
+        $diffState = $this->createMock(ObjectStateDto::class);
+        $diffState->method('getState')->willReturn([]);
+        $this->objectStateService->method('diffState')->willReturn($diffState);
+
         $deliveryOrderRequest->method('getOrder')->willReturn($merchantOrder);
         $this->apiClient->method('getOrder')->willReturn($deliveryOrder);
         $this->gatewayUtils->method('getGatewayCodeFromDeliveryOrder')->willReturn($gatewayCode);
         $this->deliveryGatewayRepository->method('findPayseraGateway')->willReturn($deliveryGateway);
 
-        $this->merchantOrderRepository->expects($this->once())->method('save')->with($merchantOrder);
+        $this->merchantOrderRepository->expects($this->exactly(2))->method('save')->with($merchantOrder);
 
         $this->service->updateMerchantOrder($deliveryOrderRequest);
     }
@@ -187,12 +237,37 @@ class DeliveryOrderCallbackServiceTest extends TestCase
         $address->method('getHouseNumber')->willReturn('1223');
         $address->method('getPostalCode')->willReturn('05566');
 
+        $shipping = $this->createMock(MerchantOrderPartyInterface::class);
+        $shipping->method('getContact')->willReturn($contact);
+        $shipping->method('getAddress')->willReturn($address);
+
+        $merchantOrder->method('getShipping')->willReturn($shipping);
+
+        return $merchantOrder;
+    }
+
+    private function mockMerchantOrderWithTerminal(): MerchantOrderInterface
+    {
+        $merchantOrder = $this->createMock(MerchantOrderInterface::class);
+        $contact = $this->createMock(MerchantOrderContactInterface::class);
+        $contact->method('getPhone')->willReturn('old_phone');
+        $contact->method('getEmail')->willReturn('old@email');
+
+        $address = $this->createMock(MerchantOrderAddressInterface::class);
+        $address->method('getCountry')->willReturn('NewCountry');
+        $address->method('getCity')->willReturn('NewCity');
+        $address->method('getState')->willReturn('NewState');
+        $address->method('getStreet')->willReturn('NewStreet');
+        $address->method('getHouseNumber')->willReturn('2334');
+        $address->method('getPostalCode')->willReturn('06677');
+
         $terminalLocation = $this->createMock(DeliveryTerminalLocationInterface::class);
         $terminalLocation->method('getTerminalId')->willReturn('OLD123');
 
         $shipping = $this->createMock(MerchantOrderPartyInterface::class);
         $shipping->method('getContact')->willReturn($contact);
         $shipping->method('getAddress')->willReturn($address);
+        $shipping->method('getTerminalLocation')->willReturn($terminalLocation);
 
         $merchantOrder->method('getShipping')->willReturn($shipping);
 

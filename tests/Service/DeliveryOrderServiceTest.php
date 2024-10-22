@@ -56,11 +56,11 @@ class DeliveryOrderServiceTest extends TestCase
             ->willReturn($deliveryOrder);
 
         $order->expects($this->once())
-            ->method('setDeliverOrderId')
+            ->method('setDeliveryOrderId')
             ->with('1');
 
         $order->expects($this->once())
-            ->method('setDeliverOrderNumber')
+            ->method('setDeliveryOrderNumber')
             ->with('order123');
 
         $this->merchantOrderRepository->expects($this->once())

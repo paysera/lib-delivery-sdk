@@ -75,20 +75,20 @@ class DeliveryOrderCallbackService
         $merchantShipping = $merchantOrder->getShipping();
 
         $fieldsMap = [
-            'party.phone' => 'contact.phone',
-            'party.email' => 'contact.email',
-            'address.country' => 'address.country',
-            'address.city' => 'address.city',
-            'address.street' => 'address.street',
-            'address.postalCode' => 'address.postalCode',
-            'address.houseNumber' => 'address.houseNumber',
+             'contact.phone' => 'party.phone',
+             'contact.email' => 'party.email',
+             'address.country' => 'address.country',
+             'address.city' => 'address.city',
+             'address.street' => 'address.street',
+             'address.postalCode' => 'address.postalCode',
+             'address.houseNumber' => 'address.houseNumber',
         ];
 
-        $deliveryOrderContactState = $this->objectStateService->getState($contact, array_keys($fieldsMap));
-        $merchantOrderShippingState = $this->objectStateService->getState($merchantShipping, array_values($fieldsMap));
+        $deliveryOrderContactState = $this->objectStateService->getState($contact, array_values($fieldsMap));
+        $merchantOrderShippingState = $this->objectStateService->getState($merchantShipping, array_keys($fieldsMap));
         $diffState = $this->objectStateService->diffState(
-            $deliveryOrderContactState,
             $merchantOrderShippingState,
+            $deliveryOrderContactState,
             $fieldsMap
         );
 
@@ -96,12 +96,13 @@ class DeliveryOrderCallbackService
             return;
         }
 
-        $this->objectStateService->setState($diffState, $merchantShipping);
+        $newState = $this->objectStateService->transformState($diffState, array_flip($fieldsMap));
+        $this->objectStateService->setState($newState, $merchantShipping);
 
         $this->logShippingChanges(
             $merchantOrder,
             $merchantOrderShippingState,
-            $diffState,
+            $newState,
             'shipping.',
         );
 

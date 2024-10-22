@@ -70,8 +70,8 @@ class DeliveryOrderService
         $order = $deliveryOrderRequest->getOrder();
         $deliveryOrder = $this->deliveryApiClient->postOrder($deliveryOrderRequest);
 
-        $order->setDeliverOrderId($deliveryOrder->getId());
-        $order->setDeliverOrderNumber($deliveryOrder->getNumber());
+        $order->setDeliveryOrderId($deliveryOrder->getId());
+        $order->setDeliveryOrderNumber($deliveryOrder->getNumber());
         $this->merchantOrderRepository->save($order);
 
         return $deliveryOrder;
