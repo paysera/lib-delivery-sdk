@@ -11,4 +11,6 @@ interface PayseraDeliveryGatewayInterface
     public function getName(): string;
 
     public function getFee(): float;
+
+    public function getSettings(): PayseraDeliveryGatewaySettingsInterface;
 }

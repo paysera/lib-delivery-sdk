@@ -6,6 +6,7 @@ namespace Paysera\DeliverySdk\Adapter;
 
 use Paysera\DeliveryApi\MerchantClient\Entity\OrderUpdate;
 use Paysera\DeliverySdk\Entity\PayseraDeliveryOrderRequest;
+use Paysera\DeliverySdk\Exception\UndefinedDeliveryGatewayException;
 use Paysera\DeliverySdk\Util\DeliveryGatewayUtils;
 
 class OrderUpdateRequestAdapter
@@ -30,13 +31,18 @@ class OrderUpdateRequestAdapter
     public function convert(PayseraDeliveryOrderRequest $request): OrderUpdate
     {
         $orderDto = $request->getOrder();
+        $deliveryGateway = $orderDto->getDeliveryGateway();
+
+        if ($deliveryGateway === null) {
+            throw new UndefinedDeliveryGatewayException();
+        }
 
         $order = (new OrderUpdate())
             ->setShipmentGatewayCode(
-                $this->gatewayUtils->resolveDeliveryGatewayCode($request->getDeliveryGatewayCode())
+                $this->gatewayUtils->resolveDeliveryGatewayCode($deliveryGateway->getCode())
             )
             ->setShipmentMethodCode(
-                $this->gatewayUtils->getShipmentMethodCode($request->getDeliveryGatewaySettings())
+                $this->gatewayUtils->getShipmentMethodCode($deliveryGateway->getSettings())
             )
             ->setShipments([...$this->shipmentsAdapter->convert($orderDto->getItems())])
             ->setReceiver($this->shipmentPointAdapter->convert($orderDto->getShipping()))

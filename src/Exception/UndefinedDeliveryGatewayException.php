@@ -6,7 +6,7 @@ namespace Paysera\DeliverySdk\Exception;
 
 class UndefinedDeliveryGatewayException extends BaseException
 {
-    protected $message = 'The delivery order doesn\'t contain a shipping method or gateway.';
+    protected $message = 'The order doesn\'t contain a proper shipping method or gateway.';
 
     public function __construct()
     {

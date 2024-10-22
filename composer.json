@@ -1,6 +1,6 @@
 {
     "name": "paysera/lib-delivery-sdk",
-    "description": "PHP delivery SDK for Paysera delivery gateway integration",
+    "description": "PHP SDK for Paysera delivery gateway integration",
     "type": "library",
     "license": "LGPL-3.0-or-later",
     "autoload": {
