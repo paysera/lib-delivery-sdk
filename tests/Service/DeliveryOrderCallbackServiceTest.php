@@ -111,8 +111,7 @@ class DeliveryOrderCallbackServiceTest extends TestCase
             ->expects($this->exactly(2))
             ->method('getState')
             ->willReturnCallback(
-                function (ArrayAccess $sourceObject)
-                use (
+                function (ArrayAccess $sourceObject) use (
                     $deliveryOrderMock,
                     $merchantOrder,
                     $oldState,
@@ -123,6 +122,8 @@ class DeliveryOrderCallbackServiceTest extends TestCase
                             return new ObjectStateDto($newState);
                         case $merchantOrder->getShipping():
                             return new ObjectStateDto($oldState);
+                        default:
+                            return new ObjectStateDto([]);
                     }
                 }
             )
