@@ -20,7 +20,7 @@ jobs:
         with:
           php-version: 7.4
           coverage: none
-          extensions: mbstring, pdo, xml, xdebug
+          extensions: mbstring, pdo, xml
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
