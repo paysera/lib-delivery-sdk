@@ -6,11 +6,12 @@ namespace Paysera\DeliverySdk\Adapter;
 
 use Paysera\DeliveryApi\MerchantClient\Entity\ShipmentCreate;
 use Paysera\DeliverySdk\Collection\OrderItemsCollection;
+use Paysera\DeliverySdk\Entity\MerchantOrderItemInterface;
 
 class ShipmentsAdapter
 {
     /**
-     * @param OrderItemsCollection $items
+     * @param OrderItemsCollection<MerchantOrderItemInterface> $items
      * @return iterable<ShipmentCreate>
      */
     public function convert(OrderItemsCollection $items): iterable

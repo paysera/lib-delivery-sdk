@@ -8,5 +8,8 @@ interface NotificationCallbackInterface
 {
     public function getUrl(): string;
 
+    /**
+     * @return array<string>
+     */
     public function getEvents(): array;
 }

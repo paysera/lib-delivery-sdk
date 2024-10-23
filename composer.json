@@ -1,6 +1,6 @@
 {
     "name": "paysera/lib-delivery-sdk",
-    "description": "PHP delivery SDK for Paysera delivery gateway integration",
+    "description": "PHP SDK for Paysera delivery gateway integration",
     "type": "library",
     "license": "LGPL-3.0-or-later",
     "autoload": {
@@ -38,9 +38,9 @@
         "analyse": "vendor/bin/phpstan analyse",
         "baseline": "vendor/bin/phpstan analyse --generate-baseline --allow-empty-baseline",
         "format": "vendor/bin/php-cs-fixer fix --allow-risky=yes",
-        "phpunit": "php ./vendor/bin/phpunit --do-not-cache-result",
+        "phpunit": "vendor/bin/phpunit ./tests --do-not-cache-result",
         "test-coverage": "php ./vendor/bin/phpunit --do-not-cache-result --coverage-html coverage",
-        "php-cs-fixer": "vendor/bin/php-cs-fixer"
+        "php-cs-fixer": "vendor/bin/php-cs-fixer check"
     },
     "config": {
         "sort-packages": true,

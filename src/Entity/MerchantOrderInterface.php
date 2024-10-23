@@ -23,6 +23,9 @@ interface MerchantOrderInterface extends ArrayAccess
 
     public function getBilling(): ?MerchantOrderPartyInterface;
 
+    /**
+     * @return OrderItemsCollection<MerchantOrderItemInterface>
+     */
     public function getItems(): OrderItemsCollection;
 
     public function getNotificationCallback(): ?NotificationCallbackInterface;
@@ -30,6 +33,4 @@ interface MerchantOrderInterface extends ArrayAccess
     public function getDeliveryGateway(): ?PayseraDeliveryGatewayInterface;
 
     public function setDeliveryGateway(PayseraDeliveryGatewayInterface $deliveryGateway): self;
-
-    public function jsonSerialize(): array;
 }

@@ -100,4 +100,3 @@ class DeliveryApiClientTest extends TestCase
         $this->deliveryApiClient->postOrder($this->deliveryOrderRequestMock);
     }
 }
-

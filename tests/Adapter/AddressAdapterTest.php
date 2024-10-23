@@ -49,13 +49,13 @@ class AddressAdapterTest extends TestCase
         ];
 
         yield 'with house number' => [
-            $expected
+            $expected,
         ];
 
         $expected['getHouseNumber'] = null;
 
         yield 'without house number' => [
-            $expected
+            $expected,
         ];
     }
 }

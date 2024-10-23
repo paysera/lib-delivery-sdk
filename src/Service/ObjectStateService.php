@@ -9,6 +9,11 @@ use Paysera\DeliverySdk\Dto\ObjectStateDto;
 
 class ObjectStateService
 {
+    /**
+     * @param ArrayAccess<string, mixed> $sourceObject
+     * @param array<string> $fieldsPaths
+     * @return ObjectStateDto
+     */
     public function getState(ArrayAccess $sourceObject, array $fieldsPaths): ObjectStateDto
     {
         $data = [];
@@ -20,6 +25,11 @@ class ObjectStateService
         return new ObjectStateDto($data);
     }
 
+    /**
+     * @param ObjectStateDto $stateDto
+     * @param ArrayAccess<string, mixed> $targetObject
+     * @return void
+     */
     public function setState(ObjectStateDto $stateDto, ArrayAccess $targetObject): void
     {
         foreach ($stateDto->getState() as $fieldPath => $value) {
@@ -27,7 +37,12 @@ class ObjectStateService
         }
     }
 
-    public function transformState(ObjectStateDto $stateDto, array $keyMap = null): ObjectStateDto
+    /**
+     * @param ObjectStateDto $stateDto
+     * @param array<string, string> $keyMap
+     * @return ObjectStateDto
+     */
+    public function transformState(ObjectStateDto $stateDto, array $keyMap): ObjectStateDto
     {
         $newState = [];
 
@@ -40,6 +55,12 @@ class ObjectStateService
         return new ObjectStateDto($newState);
     }
 
+    /**
+     * @param ObjectStateDto $left
+     * @param ObjectStateDto $right
+     * @param array<string, string>|null $keyMap
+     * @return ObjectStateDto
+     */
     public function diffState(ObjectStateDto $left, ObjectStateDto $right, ?array $keyMap = null): ObjectStateDto
     {
         $leftData = $left->getState();
@@ -59,7 +80,7 @@ class ObjectStateService
 
     /**
      * @param string $path
-     * @param ArrayAccess $object
+     * @param ArrayAccess<string, mixed> $object
      * @return mixed|null
      */
     private function getFieldData(string $path, ArrayAccess $object)
@@ -83,7 +104,7 @@ class ObjectStateService
 
     /**
      * @param string $path
-     * @param ArrayAccess $object
+     * @param ArrayAccess<string, mixed> $object
      * @param mixed $data
      * @return void
      */

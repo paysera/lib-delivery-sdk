@@ -6,7 +6,6 @@ namespace Paysera\DeliverySdk\Entity;
 
 interface MerchantOrderContactInterface
 {
-
     public function getFirstName(): string;
 
     public function getLastName(): string;

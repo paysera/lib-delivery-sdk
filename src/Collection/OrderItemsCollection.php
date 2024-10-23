@@ -8,6 +8,11 @@ use ArrayAccess;
 use Iterator;
 use Paysera\DeliverySdk\Entity\MerchantOrderItemInterface;
 
+/**
+ * @phpstan-consistent-constructor
+ * @template MerchantOrderItemInterface
+ * @extends Collection<MerchantOrderItemInterface>
+ */
 class OrderItemsCollection extends Collection
 {
     public function isCompatible(object $item): bool

@@ -14,6 +14,7 @@ use Paysera\DeliverySdk\Adapter\ShipmentsAdapter;
 use Paysera\DeliverySdk\Collection\OrderItemsCollection;
 use Paysera\DeliverySdk\Entity\MerchantOrderInterface;
 use Paysera\DeliverySdk\Entity\MerchantOrderPartyInterface;
+use Paysera\DeliverySdk\Entity\PayseraDeliveryGatewayInterface;
 use Paysera\DeliverySdk\Entity\PayseraDeliveryGatewaySettingsInterface;
 use Paysera\DeliverySdk\Entity\PayseraDeliveryOrderRequest;
 use Paysera\DeliverySdk\Entity\PayseraDeliverySettingsInterface;
@@ -26,7 +27,8 @@ class OrderCreateRequestAdapterTest extends TestCase
     private ShipmentsAdapter $shipmentsAdapterMock;
     private ShipmentPointAdapter $shipmentPointAdapterMock;
     private PayseraDeliveryOrderRequest $requestMock;
-    private MerchantOrderInterface $orderDtoMock;
+    private MerchantOrderInterface $merchantOrderMock;
+    private PayseraDeliveryGatewayInterface $deliveryGatewayMock;
     private PayseraDeliverySettingsInterface $deliverySettingsMock;
     private PayseraDeliveryGatewaySettingsInterface $deliveryGatewaySettingsMock;
 
@@ -36,7 +38,8 @@ class OrderCreateRequestAdapterTest extends TestCase
         $notificationCallbackAdapterMock = $this->createMock(OrderNotificationAdapter::class);
         $this->shipmentPointAdapterMock = $this->createMock(ShipmentPointAdapter::class);
         $this->requestMock = $this->createMock(PayseraDeliveryOrderRequest::class);
-        $this->orderDtoMock = $this->createMock(MerchantOrderInterface::class);
+        $this->merchantOrderMock = $this->createMock(MerchantOrderInterface::class);
+        $this->deliveryGatewayMock = $this->createMock(PayseraDeliveryGatewayInterface::class);
         $this->deliverySettingsMock = $this->createMock(PayseraDeliverySettingsInterface::class);
         $this->deliveryGatewaySettingsMock = $this->createMock(PayseraDeliveryGatewaySettingsInterface::class);
 
@@ -52,30 +55,35 @@ class OrderCreateRequestAdapterTest extends TestCase
     {
         $this->requestMock
             ->method('getOrder')
-            ->willReturn($this->orderDtoMock)
+            ->willReturn($this->merchantOrderMock)
         ;
-        $this->requestMock
-            ->method('getDeliveryGatewayCode')
-            ->willReturn('gatewayCode')
-        ;
-        $this->requestMock
-            ->method('getDeliveryGatewaySettings')
-            ->willReturn($this->deliveryGatewaySettingsMock)
-        ;
+
         $this->requestMock
             ->method('getDeliverySettings')
             ->willReturn($this->deliverySettingsMock)
         ;
 
-        $this->orderDtoMock
+        $this->merchantOrderMock
             ->method('getItems')
             ->willReturn(new OrderItemsCollection())
         ;
-        $this->orderDtoMock
+        $this->merchantOrderMock
             ->method('getShipping')
             ->willReturn($this->createMock(MerchantOrderPartyInterface::class))
         ;
-        $this->orderDtoMock->method('getNumber')->willReturn('ORDER123');
+        $this->merchantOrderMock
+            ->method('getDeliveryGateway')
+            ->willReturn($this->deliveryGatewayMock)
+        ;
+        $this->deliveryGatewayMock
+            ->method('getSettings')
+            ->willReturn($this->deliveryGatewaySettingsMock)
+        ;
+        $this->deliveryGatewayMock
+            ->method('getCode')
+            ->willReturn('gatewayCode')
+        ;
+        $this->merchantOrderMock->method('getNumber')->willReturn('ORDER123');
         $this->deliverySettingsMock->method('getResolvedProjectId')->willReturn('123');
 
         $this->shipmentsAdapterMock
@@ -100,30 +108,23 @@ class OrderCreateRequestAdapterTest extends TestCase
     {
         $this->requestMock
             ->method('getOrder')
-            ->willReturn($this->orderDtoMock)
+            ->willReturn($this->merchantOrderMock)
         ;
-        $this->requestMock
-            ->method('getDeliveryGatewayCode')
-            ->willReturn('gatewayCode')
-        ;
-        $this->requestMock
-            ->method('getDeliveryGatewaySettings')
-            ->willReturn($this->deliveryGatewaySettingsMock)
-        ;
+
         $this->requestMock
             ->method('getDeliverySettings')
             ->willReturn($this->deliverySettingsMock)
         ;
 
-        $this->orderDtoMock
+        $this->merchantOrderMock
             ->method('getItems')
             ->willReturn(new OrderItemsCollection())
         ;
-        $this->orderDtoMock
+        $this->merchantOrderMock
             ->method('getShipping')
             ->willReturn($this->createMock(MerchantOrderPartyInterface::class))
         ;
-        $this->orderDtoMock
+        $this->merchantOrderMock
             ->method('getNumber')
             ->willReturn('ORDER123')
         ;
@@ -131,9 +132,21 @@ class OrderCreateRequestAdapterTest extends TestCase
             ->method('getResolvedProjectId')
             ->willReturn(null)
         ;
-        $this->orderDtoMock
+        $this->merchantOrderMock
             ->method('getNotificationCallback')
             ->willReturn(null)
+        ;
+        $this->merchantOrderMock
+            ->method('getDeliveryGateway')
+            ->willReturn($this->deliveryGatewayMock)
+        ;
+        $this->deliveryGatewayMock
+            ->method('getSettings')
+            ->willReturn($this->deliveryGatewaySettingsMock)
+        ;
+        $this->deliveryGatewayMock
+            ->method('getCode')
+            ->willReturn('gatewayCode')
         ;
 
         $order = $this->orderCreateRequestAdapter->convert($this->requestMock);

@@ -10,6 +10,7 @@ use Paysera\DeliveryApi\MerchantClient\Entity\Contact;
 use Paysera\DeliveryApi\MerchantClient\Entity\Order;
 use Paysera\DeliveryApi\MerchantClient\Entity\ParcelMachine;
 use Paysera\DeliveryApi\MerchantClient\Entity\Party;
+use Paysera\DeliveryApi\MerchantClient\Entity\ShipmentGateway;
 use Paysera\DeliveryApi\MerchantClient\Entity\ShipmentMethod;
 use Paysera\DeliveryApi\MerchantClient\Entity\ShipmentPoint;
 use Paysera\DeliverySdk\Client\DeliveryApiClient;
@@ -22,6 +23,7 @@ use Paysera\DeliverySdk\Entity\MerchantOrderPartyInterface;
 use Paysera\DeliverySdk\Entity\PayseraDeliveryGatewayInterface;
 use Paysera\DeliverySdk\Entity\PayseraDeliveryOrderRequest;
 use Paysera\DeliverySdk\Exception\DeliveryGatewayNotFoundException;
+use Paysera\DeliverySdk\Exception\UndefinedDeliveryGatewayException;
 use Paysera\DeliverySdk\Repository\DeliveryGatewayRepositoryInterface;
 use Paysera\DeliverySdk\Repository\MerchantOrderRepositoryInterface;
 use Paysera\DeliverySdk\Service\DeliveryOrderCallbackService;
@@ -48,7 +50,7 @@ class DeliveryOrderCallbackServiceTest extends TestCase
         $this->objectStateService = $this->createMock(ObjectStateService::class);
         $this->merchantOrderLogger = $this->createMock(MerchantOrderLoggerInterface::class);
         $this->deliveryGatewayRepository = $this->createMock(DeliveryGatewayRepositoryInterface::class);
-        $this->gatewayUtils = $this->createMock(DeliveryGatewayUtils::class);
+        $this->gatewayUtils = new DeliveryGatewayUtils();
 
         $this->service = new DeliveryOrderCallbackService(
             $this->apiClient,
@@ -109,8 +111,7 @@ class DeliveryOrderCallbackServiceTest extends TestCase
             ->expects($this->exactly(2))
             ->method('getState')
             ->willReturnCallback(
-                function (ArrayAccess $sourceObject)
-                use (
+                function (ArrayAccess $sourceObject) use (
                     $deliveryOrderMock,
                     $merchantOrder,
                     $oldState,
@@ -121,6 +122,8 @@ class DeliveryOrderCallbackServiceTest extends TestCase
                             return new ObjectStateDto($newState);
                         case $merchantOrder->getShipping():
                             return new ObjectStateDto($oldState);
+                        default:
+                            return new ObjectStateDto([]);
                     }
                 }
             )
@@ -196,7 +199,6 @@ class DeliveryOrderCallbackServiceTest extends TestCase
 
         $deliveryOrderRequest->method('getOrder')->willReturn($merchantOrder);
         $this->apiClient->method('getOrder')->willReturn($deliveryOrder);
-        $this->gatewayUtils->method('getGatewayCodeFromDeliveryOrder')->willReturn($gatewayCode);
         $this->deliveryGatewayRepository->method('findPayseraGateway')->willReturn($deliveryGateway);
 
         $this->merchantOrderRepository->expects($this->exactly(2))->method('save')->with($merchantOrder);
@@ -204,17 +206,31 @@ class DeliveryOrderCallbackServiceTest extends TestCase
         $this->service->updateMerchantOrder($deliveryOrderRequest);
     }
 
-    public function testUpdateMerchantOrderThrowsExceptionForMissingGateway(): void
+    public function testUpdateMerchantOrderThrowsExceptionForUndefinedGateway(): void
     {
         $merchantOrder = $this->createMock(MerchantOrderInterface::class);
         $deliveryOrder = $this->createMock(Order::class);
-        $gatewayCode = 'missing_gateway';
 
         $deliveryOrderRequest = $this->createMock(PayseraDeliveryOrderRequest::class);
 
         $deliveryOrderRequest->method('getOrder')->willReturn($merchantOrder);
         $this->apiClient->method('getOrder')->willReturn($deliveryOrder);
-        $this->gatewayUtils->method('getGatewayCodeFromDeliveryOrder')->willReturn($gatewayCode);
+        $this->deliveryGatewayRepository->method('findPayseraGateway')->willReturn(null);
+
+        $this->expectException(UndefinedDeliveryGatewayException::class);
+
+        $this->service->updateMerchantOrder($deliveryOrderRequest);
+    }
+
+    public function testUpdateMerchantOrderThrowsExceptionForMissingGateway(): void
+    {
+        $merchantOrder = $this->createMock(MerchantOrderInterface::class);
+        $deliveryOrder = $this->mockDeliveryOrder();
+
+        $deliveryOrderRequest = $this->createMock(PayseraDeliveryOrderRequest::class);
+
+        $deliveryOrderRequest->method('getOrder')->willReturn($merchantOrder);
+        $this->apiClient->method('getOrder')->willReturn($deliveryOrder);
         $this->deliveryGatewayRepository->method('findPayseraGateway')->willReturn(null);
 
         $this->expectException(DeliveryGatewayNotFoundException::class);
@@ -308,6 +324,11 @@ class DeliveryOrderCallbackServiceTest extends TestCase
         $shippingMethod->method('getReceiverCode')->willReturn('parcel-machine');
 
         $deliveryOrderMock->method('getShipmentMethod')->willReturn($shippingMethod);
+
+        $shippingGateway = $this->createMock(ShipmentGateway::class);
+        $shippingGateway->method('getCode')->willReturn('PM'. rand(1000, 9999));
+
+        $deliveryOrderMock->method('getShipmentGateway')->willReturn($shippingGateway);
 
         return $deliveryOrderMock;
     }

@@ -25,7 +25,7 @@ class ContactAdapter
                 $contact->getLastName(),
                 (string)$contact->getCompany(),
             ],
-            fn($item) => $item !== ''
+            fn ($item) => $item !== ''
         );
 
         return (new Party())
