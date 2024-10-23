@@ -15,34 +15,38 @@ use Paysera\DeliverySdk\Exception\DeliveryGatewayNotFoundException;
 use Paysera\DeliverySdk\Exception\DeliveryOrderRequestException;
 use Paysera\DeliverySdk\Repository\DeliveryGatewayRepositoryInterface;
 use Paysera\DeliverySdk\Repository\MerchantOrderRepositoryInterface;
-use Paysera\DeliverySdk\Utils\DeliveryGatewayUtils;
+use Paysera\DeliverySdk\Util\DeliveryGatewayUtils;
 
-class PayseraDeliveryOrderCallbackService
+class DeliveryOrderCallbackService
 {
     private DeliveryApiClient $apiClient;
     private MerchantOrderRepositoryInterface $merchantOrderRepository;
     private ObjectStateService $objectStateService;
     private MerchantOrderLoggerInterface $merchantOrderLogger;
     private DeliveryGatewayRepositoryInterface $deliveryGatewayRepository;
+    private DeliveryGatewayUtils $gatewayUtils;
 
     public function __construct(
         DeliveryApiClient $apiClient,
         ObjectStateService $objectStateService,
         MerchantOrderRepositoryInterface $merchantOrderRepository,
         MerchantOrderLoggerInterface $merchantOrderLogger,
-        DeliveryGatewayRepositoryInterface $deliveryGatewayRepository
+        DeliveryGatewayRepositoryInterface $deliveryGatewayRepository,
+        DeliveryGatewayUtils $gatewayUtils
     ) {
         $this->apiClient = $apiClient;
         $this->merchantOrderRepository = $merchantOrderRepository;
         $this->objectStateService = $objectStateService;
         $this->merchantOrderLogger = $merchantOrderLogger;
         $this->deliveryGatewayRepository = $deliveryGatewayRepository;
+        $this->gatewayUtils = $gatewayUtils;
     }
 
     /**
      * @param PayseraDeliveryOrderRequest $deliveryOrderRequest
      * @return MerchantOrderInterface
      * @throws DeliveryOrderRequestException
+     * @throws DeliveryGatewayNotFoundException
      */
     public function updateMerchantOrder(PayseraDeliveryOrderRequest $deliveryOrderRequest): MerchantOrderInterface
     {
@@ -71,20 +75,20 @@ class PayseraDeliveryOrderCallbackService
         $merchantShipping = $merchantOrder->getShipping();
 
         $fieldsMap = [
-            'party.phone' => 'contact.phone',
-            'party.email' => 'contact.email',
-            'address.country' => 'address.country',
-            'address.city' => 'address.city',
-            'address.street' => 'address.street',
-            'address.postalCode' => 'address.postalCode',
-            'address.houseNumber' => 'address.houseNumber',
+             'contact.phone' => 'party.phone',
+             'contact.email' => 'party.email',
+             'address.country' => 'address.country',
+             'address.city' => 'address.city',
+             'address.street' => 'address.street',
+             'address.postalCode' => 'address.postalCode',
+             'address.houseNumber' => 'address.houseNumber',
         ];
 
-        $deliveryOrderContactState = $this->objectStateService->getState($contact, array_keys($fieldsMap));
-        $merchantOrderShippingState = $this->objectStateService->getState($merchantShipping, array_values($fieldsMap));
+        $deliveryOrderContactState = $this->objectStateService->getState($contact, array_values($fieldsMap));
+        $merchantOrderShippingState = $this->objectStateService->getState($merchantShipping, array_keys($fieldsMap));
         $diffState = $this->objectStateService->diffState(
-            $deliveryOrderContactState,
             $merchantOrderShippingState,
+            $deliveryOrderContactState,
             $fieldsMap
         );
 
@@ -92,12 +96,13 @@ class PayseraDeliveryOrderCallbackService
             return;
         }
 
-        $this->objectStateService->setState($diffState, $merchantShipping);
+        $newState = $this->objectStateService->transformState($diffState, array_flip($fieldsMap));
+        $this->objectStateService->setState($newState, $merchantShipping);
 
         $this->logShippingChanges(
             $merchantOrder,
             $merchantOrderShippingState,
-            $diffState,
+            $newState,
             'shipping.',
         );
 
@@ -106,7 +111,7 @@ class PayseraDeliveryOrderCallbackService
 
     private function updateDeliveryGateway(MerchantOrderInterface $merchantOrder, Order $deliveryOrder): void
     {
-        $gatewayCode = DeliveryGatewayUtils::getGatewayCodeFromDeliveryOrder($deliveryOrder);
+        $gatewayCode = $this->gatewayUtils->getGatewayCodeFromDeliveryOrder($deliveryOrder);
         $deliveryGateway = $this->deliveryGatewayRepository->findPayseraGateway($gatewayCode);
 
         if ($deliveryGateway === null) {
@@ -137,6 +142,8 @@ class PayseraDeliveryOrderCallbackService
         } else {
             $merchantOrder->getShipping()->setTerminalLocation(null);
         }
+
+        $this->merchantOrderRepository->save($merchantOrder);
     }
 
     private function updateParcelMachine(

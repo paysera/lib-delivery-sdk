@@ -4,9 +4,7 @@ declare(strict_types=1);
 
 namespace Paysera\DeliverySdk\Exception;
 
-use LogicException;
-
-class DeliveryGatewayNotFoundException extends LogicException
+class DeliveryGatewayNotFoundException extends BaseException
 {
     private const ERR_MSG_TEMPLATE = 'Cannot find delivery gateway with code \'%s\' for order %s.';
 
@@ -25,7 +23,7 @@ class DeliveryGatewayNotFoundException extends LogicException
             $this->orderNumber,
         );
 
-        parent::__construct($this->message);
+        parent::__construct($this->message, self::E_GATEWAY_NOT_FOUND);
     }
 
     public function getGatewayCode(): string

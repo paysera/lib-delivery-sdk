@@ -9,18 +9,18 @@ use Paysera\DeliverySdk\Entity\MerchantOrderAddressInterface;
 
 class AddressAdapter
 {
-    public function convert(MerchantOrderAddressInterface $addressDto): Address
+    public function convert(MerchantOrderAddressInterface $address): Address
     {
         $addressDto = (new Address())
-            ->setCountry($addressDto->getCountry())
-            ->setState($addressDto->getState())
-            ->setCity($addressDto->getCity())
-            ->setStreet($addressDto->getStreet())
-            ->setPostalCode($addressDto->getPostalCode())
+            ->setCountry($address->getCountry())
+            ->setState($address->getState())
+            ->setCity($address->getCity())
+            ->setStreet($address->getStreet())
+            ->setPostalCode($address->getPostalCode())
         ;
 
-        if ($addressDto->getHouseNumber() !== null) {
-            $addressDto->setHouseNumber($addressDto->getHouseNumber());
+        if ($address->getHouseNumber() !== null) {
+            $addressDto->setHouseNumber($address->getHouseNumber());
         }
 
         return $addressDto;

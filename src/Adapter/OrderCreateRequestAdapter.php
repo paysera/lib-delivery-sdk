@@ -5,26 +5,26 @@ declare(strict_types=1);
 namespace Paysera\DeliverySdk\Adapter;
 
 use Paysera\DeliveryApi\MerchantClient\Entity\OrderCreate;
-use Paysera\DeliveryApi\MerchantClient\Entity\OrderUpdate;
 use Paysera\DeliverySdk\Entity\PayseraDeliveryOrderRequest;
-use Paysera\DeliverySdk\Utils\DeliveryGatewayUtils;
-use Paysera\Dto\EshopOrderDto;
-use Paysera\DeliverySdk\Entity\MerchantOrderInterface;
+use Paysera\DeliverySdk\Util\DeliveryGatewayUtils;
 
 class OrderCreateRequestAdapter
 {
     private ShipmentsAdapter $shipmentsAdapter;
     private OrderNotificationAdapter $notificationCallbackAdapter;
     private ShipmentPointAdapter $shipmentPointAdapter;
+    private DeliveryGatewayUtils $gatewayUtils;
 
     public function __construct(
         ShipmentsAdapter $shipmentsAdapter,
         OrderNotificationAdapter $notificationCallbackAdapter,
-        ShipmentPointAdapter $shipmentPointAdapter
+        ShipmentPointAdapter $shipmentPointAdapter,
+        DeliveryGatewayUtils $gatewayUtils
     ) {
         $this->shipmentsAdapter = $shipmentsAdapter;
         $this->notificationCallbackAdapter = $notificationCallbackAdapter;
         $this->shipmentPointAdapter = $shipmentPointAdapter;
+        $this->gatewayUtils = $gatewayUtils;
     }
 
     public function convert(PayseraDeliveryOrderRequest $request): OrderCreate
@@ -33,12 +33,12 @@ class OrderCreateRequestAdapter
 
         $order = (new OrderCreate())
             ->setShipmentGatewayCode(
-                DeliveryGatewayUtils::resolveDeliveryGatewayCode($request->getDeliveryGatewayCode())
+                $this->gatewayUtils->resolveDeliveryGatewayCode($request->getDeliveryGatewayCode())
             )
             ->setShipmentMethodCode(
-                DeliveryGatewayUtils::getShipmentMethodCode($request->getDeliveryGatewaySettings())
+                $this->gatewayUtils->getShipmentMethodCode($request->getDeliveryGatewaySettings())
             )
-            ->setShipments([...$this->shipmentsAdapter->adapt($orderDto->getItems())])
+            ->setShipments([...$this->shipmentsAdapter->convert($orderDto->getItems())])
             ->setReceiver($this->shipmentPointAdapter->convert($orderDto->getShipping()))
             ->setEshopOrderId($orderDto->getNumber())
         ;

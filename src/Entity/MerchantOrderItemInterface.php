@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Paysera\DeliverySdk\Entity;
 
-interface MerchantOrderItemInterface
+use Paysera\DeliverySdk\Collection\ItemInterface;
+
+interface MerchantOrderItemInterface extends ItemInterface
 {
     public function getWeight(): int;
 

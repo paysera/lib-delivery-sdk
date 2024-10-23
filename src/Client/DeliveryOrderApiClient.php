@@ -11,8 +11,6 @@ use Paysera\DeliverySdk\Entity\PayseraDeliveryOrderRequest;
 
 class DeliveryOrderApiClient
 {
-    private const DEFAULT_BASE_URL = 'https://delivery-api.paysera.com/rest/v1/';
-
     private DeliveryOrderRequestAdapterFacade $orderRequestAdapter;
     private MerchantClientProvider $merchantClientProvider;
 
@@ -24,6 +22,11 @@ class DeliveryOrderApiClient
         $this->merchantClientProvider = $merchantClientProvider;
     }
 
+    /**
+     * @param PayseraDeliveryOrderRequest $deliveryOrderRequest
+     * @return Order
+     * @throws \Paysera\DeliverySdk\Exception\MerchantClientNotFoundException
+     */
     public function create(PayseraDeliveryOrderRequest $deliveryOrderRequest): Order
     {
         return $this
@@ -41,7 +44,7 @@ class DeliveryOrderApiClient
             ->merchantClientProvider
             ->getMerchantClient($deliveryOrderRequest->getDeliverySettings())
             ->updateOrder(
-                $deliveryOrderRequest->getOrder()->getDeliverOrderNumber(),
+                $deliveryOrderRequest->getOrder()->getDeliveryOrderNumber(),
                 $this->orderRequestAdapter->convertUpdate($deliveryOrderRequest)
             )
         ;
@@ -53,7 +56,7 @@ class DeliveryOrderApiClient
             ->merchantClientProvider
             ->getMerchantClient($deliveryOrderRequest->getDeliverySettings())
             ->getOrder(
-                $deliveryOrderRequest->getOrder()->getDeliverOrderId()
+                $deliveryOrderRequest->getOrder()->getDeliveryOrderId()
             )
         ;
     }

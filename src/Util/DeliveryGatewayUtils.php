@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Paysera\DeliverySdk\Utils;
+namespace Paysera\DeliverySdk\Util;
 
 use Paysera\DeliveryApi\MerchantClient\Entity\Order;
 use Paysera\DeliverySdk\Entity\PayseraDeliveryGatewaySettingsInterface;
@@ -10,7 +10,7 @@ use Paysera\DeliverySdk\Entity\PayseraDeliverySettingsInterface;
 
 class DeliveryGatewayUtils
 {
-    public static function resolveDeliveryGatewayCode(string $deliveryGatewayCode): string
+    public function resolveDeliveryGatewayCode(string $deliveryGatewayCode): string
     {
         $lastDelimPosition = strripos($deliveryGatewayCode, ':');
 
@@ -28,7 +28,7 @@ class DeliveryGatewayUtils
         );
     }
 
-    public static function getShipmentMethodCode(
+    public function getShipmentMethodCode(
         PayseraDeliveryGatewaySettingsInterface $deliveryGatewaySettings
     ): string {
         return sprintf(
@@ -38,7 +38,7 @@ class DeliveryGatewayUtils
         );
     }
 
-    public static function getGatewayCodeFromDeliveryOrder(Order $order): string
+    public function getGatewayCodeFromDeliveryOrder(Order $order): string
     {
         $receiverCode = $order->getShipmentMethod()->getReceiverCode();
         $shipmentMethodCode = PayseraDeliverySettingsInterface::TYPE_COURIER;

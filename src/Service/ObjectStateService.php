@@ -27,6 +27,19 @@ class ObjectStateService
         }
     }
 
+    public function transformState(ObjectStateDto $stateDto, array $keyMap = null): ObjectStateDto
+    {
+        $newState = [];
+
+        foreach ($stateDto->getState() as $fieldPath => $value) {
+            if (isset($keyMap[$fieldPath])) {
+                $newState[$keyMap[$fieldPath]] = $value;
+            }
+        }
+
+        return new ObjectStateDto($newState);
+    }
+
     public function diffState(ObjectStateDto $left, ObjectStateDto $right, ?array $keyMap = null): ObjectStateDto
     {
         $leftData = $left->getState();
@@ -52,11 +65,12 @@ class ObjectStateService
     private function getFieldData(string $path, ArrayAccess $object)
     {
         $path = explode('.', $path);
-        $lastItemKey = key(array_reverse($path));
+        $lastItemKey = array_key_last($path);
         $currentLevel = $object;
 
         foreach ($path as $key => $item) {
             $data = $currentLevel->offsetGet($item) ?? null;
+
             if ($key === $lastItemKey) {
                 return $data;
             }
@@ -76,7 +90,7 @@ class ObjectStateService
     private function setFieldData(string $path, ArrayAccess $object, $data): void
     {
         $path = explode('.', $path);
-        $lastItemKey = key(array_reverse($path));
+        $lastItemKey = array_key_last($path);
         $currentLevel = $object;
 
         foreach ($path as $key => $item) {
