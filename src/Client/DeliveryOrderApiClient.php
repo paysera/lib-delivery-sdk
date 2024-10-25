@@ -8,6 +8,8 @@ use Paysera\DeliveryApi\MerchantClient\Entity\Order;
 use Paysera\DeliverySdk\Adapter\DeliveryOrderRequestAdapterFacade;
 use Paysera\DeliverySdk\Client\Provider\MerchantClientProvider;
 use Paysera\DeliverySdk\Entity\PayseraDeliveryOrderRequest;
+use Paysera\DeliverySdk\Exception\MerchantClientNotFoundException;
+use Paysera\DeliverySdk\Exception\UndefinedDeliveryOrderException;
 
 class DeliveryOrderApiClient
 {
@@ -25,7 +27,7 @@ class DeliveryOrderApiClient
     /**
      * @param PayseraDeliveryOrderRequest $deliveryOrderRequest
      * @return Order
-     * @throws \Paysera\DeliverySdk\Exception\MerchantClientNotFoundException
+     * @throws MerchantClientNotFoundException
      */
     public function create(PayseraDeliveryOrderRequest $deliveryOrderRequest): Order
     {
@@ -38,13 +40,25 @@ class DeliveryOrderApiClient
         ;
     }
 
+    /**
+     * @param PayseraDeliveryOrderRequest $deliveryOrderRequest
+     * @return Order
+     * @throws UndefinedDeliveryOrderException
+     * @throws MerchantClientNotFoundException
+     */
     public function update(PayseraDeliveryOrderRequest $deliveryOrderRequest): Order
     {
+        $deliveryOrderId = $deliveryOrderRequest->getOrder()->getDeliveryOrderNumber();
+
+        if ($deliveryOrderId === null) {
+            throw new UndefinedDeliveryOrderException($deliveryOrderRequest->getOrder());
+        }
+
         return $this
             ->merchantClientProvider
             ->getMerchantClient($deliveryOrderRequest->getDeliverySettings())
             ->updateOrder(
-                $deliveryOrderRequest->getOrder()->getDeliveryOrderNumber(),
+                $deliveryOrderId,
                 $this->orderRequestAdapter->convertUpdate($deliveryOrderRequest)
             )
         ;

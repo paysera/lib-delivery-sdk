@@ -7,10 +7,10 @@ namespace Paysera\DeliverySdk\Service;
 use Paysera\DeliveryApi\MerchantClient\Entity\Order;
 use Paysera\DeliverySdk\Client\DeliveryApiClient;
 use Paysera\DeliverySdk\Dto\ObjectStateDto;
+use Paysera\DeliverySdk\Entity\DeliveryTerminalLocationFactoryInterface;
 use Paysera\DeliverySdk\Entity\MerchantOrderInterface;
 use Paysera\DeliverySdk\Entity\PayseraDeliveryOrderRequest;
 use Paysera\DeliverySdk\Entity\PayseraDeliverySettingsInterface;
-use Paysera\DeliverySdk\Entity\TerminalLocation;
 use Paysera\DeliverySdk\Exception\DeliveryGatewayNotFoundException;
 use Paysera\DeliverySdk\Exception\DeliveryOrderRequestException;
 use Paysera\DeliverySdk\Exception\UndefinedDeliveryGatewayException;
@@ -26,6 +26,7 @@ class DeliveryOrderCallbackService
     private MerchantOrderLoggerInterface $merchantOrderLogger;
     private DeliveryGatewayRepositoryInterface $deliveryGatewayRepository;
     private DeliveryGatewayUtils $gatewayUtils;
+    private DeliveryTerminalLocationFactoryInterface $deliveryTerminalLocationFactory;
 
     public function __construct(
         DeliveryApiClient $apiClient,
@@ -33,7 +34,8 @@ class DeliveryOrderCallbackService
         MerchantOrderRepositoryInterface $merchantOrderRepository,
         MerchantOrderLoggerInterface $merchantOrderLogger,
         DeliveryGatewayRepositoryInterface $deliveryGatewayRepository,
-        DeliveryGatewayUtils $gatewayUtils
+        DeliveryGatewayUtils $gatewayUtils,
+        DeliveryTerminalLocationFactoryInterface $deliveryTerminalLocationFactory
     ) {
         $this->apiClient = $apiClient;
         $this->merchantOrderRepository = $merchantOrderRepository;
@@ -41,6 +43,7 @@ class DeliveryOrderCallbackService
         $this->merchantOrderLogger = $merchantOrderLogger;
         $this->deliveryGatewayRepository = $deliveryGatewayRepository;
         $this->gatewayUtils = $gatewayUtils;
+        $this->deliveryTerminalLocationFactory = $deliveryTerminalLocationFactory;
     }
 
     /**
@@ -118,7 +121,7 @@ class DeliveryOrderCallbackService
             throw new UndefinedDeliveryGatewayException();
         }
 
-        $deliveryGateway = $this->deliveryGatewayRepository->findPayseraGateway($gatewayCode);
+        $deliveryGateway = $this->deliveryGatewayRepository->findPayseraGatewayForDeliveryOrder($deliveryOrder);
 
         if ($deliveryGateway === null) {
             throw new DeliveryGatewayNotFoundException($gatewayCode, $merchantOrder->getNumber());
@@ -171,7 +174,8 @@ class DeliveryOrderCallbackService
 
         $address = $parcelMachine->getAddress();
 
-        $newTerminalLocation = (new TerminalLocation())
+        $newTerminalLocation = $this->deliveryTerminalLocationFactory
+            ->create()
             ->setCountry($address->getCountry())
             ->setCity((string)$address->getCity())
             ->setTerminalId($parcelMachine->getId())
