@@ -9,5 +9,5 @@ use Paysera\DeliverySdk\Entity\PayseraDeliveryGatewayInterface;
 
 interface DeliveryGatewayRepositoryInterface
 {
-    public function findPayseraGatewayForDeliveryOrder(Order $gatewayCode): ?PayseraDeliveryGatewayInterface;
+    public function findPayseraGatewayForDeliveryOrder(Order $deliveryOrder): ?PayseraDeliveryGatewayInterface;
 }
