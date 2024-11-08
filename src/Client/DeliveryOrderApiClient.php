@@ -48,7 +48,7 @@ class DeliveryOrderApiClient
      */
     public function update(PayseraDeliveryOrderRequest $deliveryOrderRequest): Order
     {
-        $deliveryOrderId = $deliveryOrderRequest->getOrder()->getDeliveryOrderNumber();
+        $deliveryOrderId = $deliveryOrderRequest->getOrder()->getDeliveryOrderId();
 
         if ($deliveryOrderId === null) {
             throw new UndefinedDeliveryOrderException($deliveryOrderRequest->getOrder());
@@ -66,6 +66,12 @@ class DeliveryOrderApiClient
 
     public function get(PayseraDeliveryOrderRequest $deliveryOrderRequest): Order
     {
+        $deliveryOrderId = $deliveryOrderRequest->getOrder()->getDeliveryOrderId();
+
+        if ($deliveryOrderId === null) {
+            throw new UndefinedDeliveryOrderException($deliveryOrderRequest->getOrder());
+        }
+
         return $this
             ->merchantClientProvider
             ->getMerchantClient($deliveryOrderRequest->getDeliverySettings())

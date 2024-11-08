@@ -6,6 +6,7 @@ namespace Paysera\DeliverySdk\Service;
 
 use Paysera\DeliverySdk\Entity\DeliveryTerminalLocationInterface;
 use Paysera\DeliverySdk\Entity\MerchantOrderInterface;
+use Paysera\DeliverySdk\Entity\PayseraDeliveryGatewayInterface;
 
 interface MerchantOrderLoggerInterface
 {
@@ -16,6 +17,13 @@ interface MerchantOrderLoggerInterface
      * @return void
      */
     public function logShippingChanges(MerchantOrderInterface $merchantOrder, array $oldData, array $newData): void;
+
+    public function logDeliveryGatewayChanges(
+        MerchantOrderInterface $merchantOrder,
+        PayseraDeliveryGatewayInterface $oldGateway,
+        PayseraDeliveryGatewayInterface $newGateway
+    ): void;
+
     public function logDeliveryTerminalLocationChanges(
         MerchantOrderInterface $merchantOrder,
         DeliveryTerminalLocationInterface $oldTerminalLocation,

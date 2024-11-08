@@ -51,6 +51,7 @@ class DeliveryOrderCallbackService
      * @return MerchantOrderInterface
      * @throws DeliveryOrderRequestException
      * @throws DeliveryGatewayNotFoundException
+     * @throws UndefinedDeliveryGatewayException
      */
     public function updateMerchantOrder(PayseraDeliveryOrderRequest $deliveryOrderRequest): MerchantOrderInterface
     {
@@ -151,6 +152,8 @@ class DeliveryOrderCallbackService
         } else {
             $merchantOrder->getShipping()->setTerminalLocation(null);
         }
+
+        $this->merchantOrderLogger->logDeliveryGatewayChanges($merchantOrder, $actualDeliveryGateway, $deliveryGateway);
 
         $this->merchantOrderRepository->save($merchantOrder);
     }

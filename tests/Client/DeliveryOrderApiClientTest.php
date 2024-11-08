@@ -82,7 +82,7 @@ class DeliveryOrderApiClientTest extends TestCase
             ->willReturn($orderDtoMock)
         ;
 
-        $orderDtoMock->method('getDeliveryOrderNumber')
+        $orderDtoMock->method('getDeliveryOrderId')
             ->willReturn('123456')
         ;
 

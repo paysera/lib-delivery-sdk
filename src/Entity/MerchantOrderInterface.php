@@ -11,7 +11,7 @@ interface MerchantOrderInterface extends ArrayAccess
 {
     public function getNumber(): string;
 
-    public function getDeliveryOrderId(): string;
+    public function getDeliveryOrderId(): ?string;
 
     public function getDeliveryOrderNumber(): ?string;
 

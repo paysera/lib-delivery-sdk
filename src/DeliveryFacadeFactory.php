@@ -6,15 +6,15 @@ namespace Paysera\DeliverySdk;
 
 use Paysera\DeliverySdk\Service\DeliveryOrderCallbackService;
 use Paysera\DeliverySdk\Service\DeliveryOrderService;
-use Paysera\DeliverySdk\Util\Container;
 use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
 
 class DeliveryFacadeFactory
 {
-    private Container $container;
+    private ContainerInterface $container;
 
-    public function __construct(Container $container)
+    public function __construct(ContainerInterface $container)
     {
         $this->container = $container;
     }
