@@ -6,6 +6,7 @@ namespace Paysera\DeliverySdk\Adapter;
 
 use Paysera\DeliveryApi\MerchantClient\Entity\ShipmentPointCreate;
 use Paysera\DeliverySdk\Entity\MerchantOrderPartyInterface;
+use Paysera\DeliverySdk\Entity\PayseraDeliverySettingsInterface;
 
 class ShipmentPointAdapter
 {
@@ -20,18 +21,26 @@ class ShipmentPointAdapter
         $this->addressAdapter = $addressAdapter;
     }
 
-    public function convert(MerchantOrderPartyInterface $partyDto): ShipmentPointCreate
-    {
+    public function convert(
+        MerchantOrderPartyInterface $partyDto,
+        PayseraDeliverySettingsInterface $deliverySettings,
+        string $type
+    ): ShipmentPointCreate {
         $contact = $this->contactAdapter
             ->convert($partyDto->getContact())
             ->setAddress($this->addressAdapter->convert($partyDto->getAddress()));
         ;
 
         $shipmentPoint = (new ShipmentPointCreate())
+            ->setType($type)
             ->setSaved(false)
             ->setDefaultContact(false)
             ->setContact($contact)
         ;
+
+        if ($deliverySettings->getResolvedProjectId() !== null) {
+            $shipmentPoint->setProjectId($deliverySettings->getResolvedProjectId());
+        }
 
         if ($partyDto->getTerminalLocation() !== null) {
             $shipmentPoint->setParcelMachineId(

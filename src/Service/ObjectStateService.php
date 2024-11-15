@@ -90,7 +90,13 @@ class ObjectStateService
         $currentLevel = $object;
 
         foreach ($path as $key => $item) {
-            $data = $currentLevel->offsetGet($item) ?? null;
+            if ($currentLevel instanceof ArrayAccess) {
+                $data = $currentLevel->offsetGet($item) ?? null;
+            } elseif (is_array($currentLevel)) {
+                $data = $currentLevel[$item] ?? null;
+            } else {
+                continue;
+            }
 
             if ($key === $lastItemKey) {
                 return $data;

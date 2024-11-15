@@ -85,16 +85,17 @@ class DeliveryOrderCallbackService
              'address.country' => 'address.country',
              'address.city' => 'address.city',
              'address.street' => 'address.street',
-             'address.postalCode' => 'address.postalCode',
-             'address.houseNumber' => 'address.houseNumber',
+             'address.postalCode' => 'address.postal_code',
+             'address.houseNumber' => 'address.house_number',
         ];
 
         $deliveryOrderContactState = $this->objectStateService->getState($contact, array_values($fieldsMap));
         $merchantOrderShippingState = $this->objectStateService->getState($merchantShipping, array_keys($fieldsMap));
+
         $diffState = $this->objectStateService->diffState(
-            $merchantOrderShippingState,
             $deliveryOrderContactState,
-            $fieldsMap
+            $merchantOrderShippingState,
+            array_flip($fieldsMap)
         );
 
         if (empty($diffState->getState())) {
@@ -103,7 +104,7 @@ class DeliveryOrderCallbackService
 
         $newState = $this->objectStateService->transformState($diffState, array_flip($fieldsMap));
         $this->objectStateService->setState($newState, $merchantShipping);
-
+        
         $this->logShippingChanges(
             $merchantOrder,
             $merchantOrderShippingState,
@@ -182,13 +183,13 @@ class DeliveryOrderCallbackService
             ->setCountry($address->getCountry())
             ->setCity((string)$address->getCity())
             ->setTerminalId($parcelMachine->getId())
-            ->setDeliveryGatewayCode($newDeliveryGatewayCode)
+            ->setDeliveryGatewayCode($this->gatewayUtils->resolveDeliveryGatewayCode($newDeliveryGatewayCode))
         ;
         $oldTerminalLocation = $order->getShipping()->getTerminalLocation();
 
         if (
-            $oldTerminalLocation === null
-            || $oldTerminalLocation->getTerminalId() === $newTerminalLocation->getTerminalId()
+            $oldTerminalLocation !== null
+            && $oldTerminalLocation->getTerminalId() === $newTerminalLocation->getTerminalId()
         ) {
             return;
         }
@@ -217,6 +218,6 @@ class DeliveryOrderCallbackService
             $currData[$prefix . $key] = $value;
         }
 
-        $this->merchantOrderLogger->logShippingChanges($order, $currData, $prevData);
+        $this->merchantOrderLogger->logShippingChanges($order, $prevData, $currData);
     }
 }

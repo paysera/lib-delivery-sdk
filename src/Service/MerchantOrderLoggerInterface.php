@@ -26,7 +26,7 @@ interface MerchantOrderLoggerInterface
 
     public function logDeliveryTerminalLocationChanges(
         MerchantOrderInterface $merchantOrder,
-        DeliveryTerminalLocationInterface $oldTerminalLocation,
+        ?DeliveryTerminalLocationInterface $oldTerminalLocation,
         DeliveryTerminalLocationInterface $newTerminalLocation
     ): void;
 }

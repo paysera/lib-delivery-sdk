@@ -144,15 +144,6 @@ class DeliveryOrderCallbackServiceTest extends TestCase
             ->with(
                 $merchantOrder,
                 [
-                    'shipping.contact.phone' => 'new_phone',
-                    'shipping.contact.email' => 'new@email',
-                    'shipping.address.country' => 'NewCountry',
-                    'shipping.address.city' => 'NewCity',
-                    'shipping.address.street' => 'NewStreet',
-                    'shipping.address.postalCode' => '06677',
-                    'shipping.address.houseNumber' => '2334',
-                ],
-                [
                     'shipping.contact.phone' => 'old_phone',
                     'shipping.contact.email' => 'old@email',
                     'shipping.address.country' => 'OldCountry',
@@ -160,6 +151,15 @@ class DeliveryOrderCallbackServiceTest extends TestCase
                     'shipping.address.street' => 'OldStreet',
                     'shipping.address.postalCode' => '05566',
                     'shipping.address.houseNumber' => '1223',
+                ],
+                [
+                    'shipping.contact.phone' => 'new_phone',
+                    'shipping.contact.email' => 'new@email',
+                    'shipping.address.country' => 'NewCountry',
+                    'shipping.address.city' => 'NewCity',
+                    'shipping.address.street' => 'NewStreet',
+                    'shipping.address.postalCode' => '06677',
+                    'shipping.address.houseNumber' => '2334',
                 ],
             )
         ;

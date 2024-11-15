@@ -14,6 +14,7 @@ use Paysera\DeliverySdk\Entity\DeliveryTerminalLocationInterface;
 use Paysera\DeliverySdk\Entity\MerchantOrderAddressInterface;
 use Paysera\DeliverySdk\Entity\MerchantOrderContactInterface;
 use Paysera\DeliverySdk\Entity\MerchantOrderPartyInterface;
+use Paysera\DeliverySdk\Entity\PayseraDeliverySettingsInterface;
 use PHPUnit\Framework\TestCase;
 
 class ShipmentPointAdapterTest extends TestCase
@@ -27,6 +28,8 @@ class ShipmentPointAdapterTest extends TestCase
     private MerchantOrderContactInterface $merchantContactMock;
     private MerchantOrderAddressInterface $merchantAddressMock;
 
+    private PayseraDeliverySettingsInterface $deliverySettingsMock;
+
     protected function setUp(): void
     {
         $this->contactAdapterMock = $this->createMock(ContactAdapter::class);
@@ -38,6 +41,8 @@ class ShipmentPointAdapterTest extends TestCase
 
         $this->merchantContactMock = $this->createMock(MerchantOrderContactInterface::class);
         $this->merchantAddressMock = $this->createMock(MerchantOrderAddressInterface::class);
+
+        $this->deliverySettingsMock = $this->createMock(PayseraDeliverySettingsInterface::class);
 
         $this->shipmentPointAdapter = new ShipmentPointAdapter(
             $this->contactAdapterMock,
@@ -59,11 +64,19 @@ class ShipmentPointAdapterTest extends TestCase
         $this->contactAdapterMock->method('convert')->willReturn($this->contactMock);
         $this->addressAdapterMock->method('convert')->willReturn($this->addressMock);
 
-        $shipmentPoint = $this->shipmentPointAdapter->convert($this->partyDtoMock);
+        $this->deliverySettingsMock->method('getResolvedProjectId')->willReturn('123');
+
+        $shipmentPoint = $this->shipmentPointAdapter->convert(
+            $this->partyDtoMock,
+            $this->deliverySettingsMock,
+            'receiver'
+        );
 
         $this->assertInstanceOf(ShipmentPointCreate::class, $shipmentPoint);
         $this->assertFalse($shipmentPoint->isSaved());
         $this->assertFalse($shipmentPoint->isDefaultContact());
+        $this->assertEquals('receiver', $shipmentPoint->getType());
+        $this->assertEquals('123', $shipmentPoint->getProjectId());
         $this->assertSame($this->contactMock->getData(), $shipmentPoint->getContact()->getData());
         $this->assertSame($expectedParcelMachineId, $shipmentPoint->getParcelMachineId());
     }

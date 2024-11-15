@@ -17,7 +17,7 @@ interface MerchantOrderInterface extends ArrayAccess
 
     public function setDeliveryOrderId(string $id): self;
 
-    public function setDeliveryOrderNumber(string $number): self;
+    public function setDeliveryOrderNumber(?string $number): self;
 
     public function getShipping(): MerchantOrderPartyInterface;
 
