@@ -76,7 +76,7 @@ class DeliveryOrderApiClient
             ->merchantClientProvider
             ->getMerchantClient($deliveryOrderRequest->getDeliverySettings())
             ->getOrder(
-                $deliveryOrderRequest->getOrder()->getDeliveryOrderId()
+                (string)$deliveryOrderRequest->getOrder()->getDeliveryOrderId()
             )
         ;
     }

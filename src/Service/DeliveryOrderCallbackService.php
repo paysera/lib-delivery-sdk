@@ -104,7 +104,7 @@ class DeliveryOrderCallbackService
 
         $newState = $this->objectStateService->transformState($diffState, array_flip($fieldsMap));
         $this->objectStateService->setState($newState, $merchantShipping);
-        
+
         $this->logShippingChanges(
             $merchantOrder,
             $merchantOrderShippingState,
