@@ -69,7 +69,7 @@ class DeliveryOrderApiClient
      * @throws \Paysera\DeliverySdk\Exception\MerchantClientNotFoundException
      * @throws UndefinedDeliveryOrderException
      */
-    public function prepaid(PayseraDeliveryOrderRequest $deliveryOrderRequest)
+    public function prepaid(PayseraDeliveryOrderRequest $deliveryOrderRequest): Order
     {
         $deliveryOrderId = $deliveryOrderRequest->getOrder()->getDeliveryOrderId();
         if ($deliveryOrderId === null) {
@@ -78,15 +78,16 @@ class DeliveryOrderApiClient
 
         $orderIdsList = new OrderIdsList([
             'order_ids' => [
-                $deliveryOrderId
+                $deliveryOrderId,
             ],
         ]);
 
         $this
             ->merchantClientProvider
             ->getMerchantClient($deliveryOrderRequest->getDeliverySettings())
-            ->createOrdersPrepaid($orderIdsList)
-        ;
+            ->createOrdersPrepaid($orderIdsList);
+
+        return $this->get($deliveryOrderRequest);
     }
 
     public function get(PayseraDeliveryOrderRequest $deliveryOrderRequest): Order

@@ -79,11 +79,18 @@ class DeliveryApiClient
     }
 
     /**
+     * @param PayseraDeliveryOrderRequest $deliveryOrderRequest
+     * @return Order
      * @throws DeliveryOrderRequestException
      */
     public function prepaidOrder(PayseraDeliveryOrderRequest $deliveryOrderRequest): Order
     {
-        return $this->sendOrderRequest(self::ACTION_PREPAID, fn(PayseraDeliveryOrderRequest $deliveryOrderRequest) => $this->orderRequestHandler->prepaid($deliveryOrderRequest), $deliveryOrderRequest);
+        return $this->sendOrderRequest(
+            self::ACTION_PREPAID,
+            fn (PayseraDeliveryOrderRequest $deliveryOrderRequest) => $this->orderRequestHandler
+                ->prepaid($deliveryOrderRequest),
+            $deliveryOrderRequest
+        );
     }
 
     /**

@@ -126,7 +126,14 @@ class DeliveryOrderApiClientTest extends TestCase
             ->method('createOrdersPrepaid')
         ;
 
-        $this->deliveryOrderApiClient->prepaid($this->deliveryOrderRequestMock);
+        $this->merchantClientMock->method('getOrder')
+            ->with('123456')
+            ->willReturn($this->orderMock)
+        ;
+
+        $result = $this->deliveryOrderApiClient->prepaid($this->deliveryOrderRequestMock);
+
+        $this->assertSame($this->orderMock, $result);
     }
 
     public function testGet(): void
