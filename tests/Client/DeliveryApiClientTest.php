@@ -61,6 +61,19 @@ class DeliveryApiClientTest extends TestCase
         $this->assertSame($this->orderMock, $result);
     }
 
+    public function testPrepaidOrder(): void
+    {
+        $this->orderRequestHandlerMock->expects($this->once())
+            ->method('prepaid')
+            ->with($this->deliveryOrderRequestMock)
+            ->willReturn($this->orderMock)
+        ;
+
+        $result = $this->deliveryApiClient->prepaidOrder($this->deliveryOrderRequestMock);
+
+        $this->assertSame($this->orderMock, $result);
+    }
+
     public function testGetOrder(): void
     {
         $this->orderRequestHandlerMock->expects($this->once())

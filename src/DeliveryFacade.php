@@ -54,4 +54,12 @@ class DeliveryFacade
     {
         return $this->deliveryOrderCallbackService->updateMerchantOrder($deliveryOrderRequest);
     }
+
+    /**
+     * @throws DeliveryOrderRequestException
+     */
+    public function prepaidDeliveryOrder(PayseraDeliveryOrderRequest $deliveryOrderRequest): ?MerchantOrderInterface
+    {
+        return $this->deliveryOrderService->prepaidDeliveryOrder($deliveryOrderRequest);
+    }
 }

@@ -62,6 +62,22 @@ class DeliveryFacadeTest extends TestCase
         $this->assertSame($merchantOrder, $result);
     }
 
+    public function testPrepaidDeliveryOrder(): void
+    {
+        $deliveryOrderRequest = $this->createMock(PayseraDeliveryOrderRequest::class);
+        $merchantOrder = $this->createMock(MerchantOrderInterface::class);
+
+        $this->deliveryOrderService ->expects($this->once())
+            ->method('prepaidDeliveryOrder')
+            ->with($deliveryOrderRequest)
+            ->willReturn($merchantOrder)
+        ;
+
+        $result = $this->deliveryFacade->prepaidDeliveryOrder($deliveryOrderRequest);
+
+        $this->assertSame($merchantOrder, $result);
+    }
+
     public function testUpdateMerchantOrder(): void
     {
         $deliveryOrderRequest = $this->createMock(PayseraDeliveryOrderRequest::class);

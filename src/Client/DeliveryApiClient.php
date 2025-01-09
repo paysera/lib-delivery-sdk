@@ -16,6 +16,7 @@ class DeliveryApiClient
 {
     public const ACTION_CREATE = 'create';
     public const ACTION_UPDATE = 'update';
+    public const ACTION_PREPAID = 'prepaid';
     public const ACTION_GET = 'get';
 
     private DeliveryOrderApiClient $orderRequestHandler;
@@ -73,6 +74,21 @@ class DeliveryApiClient
             fn (PayseraDeliveryOrderRequest $deliveryOrderRequest) => $this
                 ->orderRequestHandler
                 ->get($deliveryOrderRequest),
+            $deliveryOrderRequest
+        );
+    }
+
+    /**
+     * @param PayseraDeliveryOrderRequest $deliveryOrderRequest
+     * @return Order
+     * @throws DeliveryOrderRequestException
+     */
+    public function prepaidOrder(PayseraDeliveryOrderRequest $deliveryOrderRequest): Order
+    {
+        return $this->sendOrderRequest(
+            self::ACTION_PREPAID,
+            fn (PayseraDeliveryOrderRequest $deliveryOrderRequest) => $this->orderRequestHandler
+                ->prepaid($deliveryOrderRequest),
             $deliveryOrderRequest
         );
     }

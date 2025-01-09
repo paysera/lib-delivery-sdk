@@ -58,6 +58,17 @@ class DeliveryOrderService
         return $deliveryOrderRequest->getOrder();
     }
 
+    /**
+     * @throws DeliveryOrderRequestException
+     */
+    public function prepaidDeliveryOrder(PayseraDeliveryOrderRequest $deliveryOrderRequest): ?MerchantOrderInterface
+    {
+        $this->logStepStarted(DeliveryApiClient::ACTION_PREPAID, $deliveryOrderRequest);
+        $deliveryOrder = $this->deliveryApiClient->prepaidOrder($deliveryOrderRequest);
+        $this->logStepCompleted(DeliveryApiClient::ACTION_PREPAID, $deliveryOrderRequest, $deliveryOrder);
+        return $deliveryOrderRequest->getOrder();
+    }
+
     #region Handling
 
     /**
