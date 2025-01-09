@@ -7,10 +7,10 @@ namespace Paysera\DeliverySdk\Service;
 use Paysera\DeliveryApi\MerchantClient\Entity\Order;
 use Paysera\DeliverySdk\Client\DeliveryApiClient;
 use Paysera\DeliverySdk\Dto\ObjectStateDto;
+use Paysera\DeliverySdk\Entity\DeliveryTerminalLocationFactoryInterface;
 use Paysera\DeliverySdk\Entity\MerchantOrderInterface;
 use Paysera\DeliverySdk\Entity\PayseraDeliveryOrderRequest;
 use Paysera\DeliverySdk\Entity\PayseraDeliverySettingsInterface;
-use Paysera\DeliverySdk\Entity\TerminalLocation;
 use Paysera\DeliverySdk\Exception\DeliveryGatewayNotFoundException;
 use Paysera\DeliverySdk\Exception\DeliveryOrderRequestException;
 use Paysera\DeliverySdk\Exception\UndefinedDeliveryGatewayException;
@@ -26,6 +26,7 @@ class DeliveryOrderCallbackService
     private MerchantOrderLoggerInterface $merchantOrderLogger;
     private DeliveryGatewayRepositoryInterface $deliveryGatewayRepository;
     private DeliveryGatewayUtils $gatewayUtils;
+    private DeliveryTerminalLocationFactoryInterface $deliveryTerminalLocationFactory;
 
     public function __construct(
         DeliveryApiClient $apiClient,
@@ -33,7 +34,8 @@ class DeliveryOrderCallbackService
         MerchantOrderRepositoryInterface $merchantOrderRepository,
         MerchantOrderLoggerInterface $merchantOrderLogger,
         DeliveryGatewayRepositoryInterface $deliveryGatewayRepository,
-        DeliveryGatewayUtils $gatewayUtils
+        DeliveryGatewayUtils $gatewayUtils,
+        DeliveryTerminalLocationFactoryInterface $deliveryTerminalLocationFactory
     ) {
         $this->apiClient = $apiClient;
         $this->merchantOrderRepository = $merchantOrderRepository;
@@ -41,6 +43,7 @@ class DeliveryOrderCallbackService
         $this->merchantOrderLogger = $merchantOrderLogger;
         $this->deliveryGatewayRepository = $deliveryGatewayRepository;
         $this->gatewayUtils = $gatewayUtils;
+        $this->deliveryTerminalLocationFactory = $deliveryTerminalLocationFactory;
     }
 
     /**
@@ -48,6 +51,7 @@ class DeliveryOrderCallbackService
      * @return MerchantOrderInterface
      * @throws DeliveryOrderRequestException
      * @throws DeliveryGatewayNotFoundException
+     * @throws UndefinedDeliveryGatewayException
      */
     public function updateMerchantOrder(PayseraDeliveryOrderRequest $deliveryOrderRequest): MerchantOrderInterface
     {
@@ -81,16 +85,17 @@ class DeliveryOrderCallbackService
              'address.country' => 'address.country',
              'address.city' => 'address.city',
              'address.street' => 'address.street',
-             'address.postalCode' => 'address.postalCode',
-             'address.houseNumber' => 'address.houseNumber',
+             'address.postalCode' => 'address.postal_code',
+             'address.houseNumber' => 'address.house_number',
         ];
 
         $deliveryOrderContactState = $this->objectStateService->getState($contact, array_values($fieldsMap));
         $merchantOrderShippingState = $this->objectStateService->getState($merchantShipping, array_keys($fieldsMap));
+
         $diffState = $this->objectStateService->diffState(
-            $merchantOrderShippingState,
             $deliveryOrderContactState,
-            $fieldsMap
+            $merchantOrderShippingState,
+            array_flip($fieldsMap)
         );
 
         if (empty($diffState->getState())) {
@@ -118,7 +123,7 @@ class DeliveryOrderCallbackService
             throw new UndefinedDeliveryGatewayException();
         }
 
-        $deliveryGateway = $this->deliveryGatewayRepository->findPayseraGateway($gatewayCode);
+        $deliveryGateway = $this->deliveryGatewayRepository->findPayseraGatewayForDeliveryOrder($deliveryOrder);
 
         if ($deliveryGateway === null) {
             throw new DeliveryGatewayNotFoundException($gatewayCode, $merchantOrder->getNumber());
@@ -149,6 +154,8 @@ class DeliveryOrderCallbackService
             $merchantOrder->getShipping()->setTerminalLocation(null);
         }
 
+        $this->merchantOrderLogger->logDeliveryGatewayChanges($merchantOrder, $actualDeliveryGateway, $deliveryGateway);
+
         $this->merchantOrderRepository->save($merchantOrder);
     }
 
@@ -171,17 +178,18 @@ class DeliveryOrderCallbackService
 
         $address = $parcelMachine->getAddress();
 
-        $newTerminalLocation = (new TerminalLocation())
+        $newTerminalLocation = $this->deliveryTerminalLocationFactory
+            ->create()
             ->setCountry($address->getCountry())
             ->setCity((string)$address->getCity())
             ->setTerminalId($parcelMachine->getId())
-            ->setDeliveryGatewayCode($newDeliveryGatewayCode)
+            ->setDeliveryGatewayCode($this->gatewayUtils->resolveDeliveryGatewayCode($newDeliveryGatewayCode))
         ;
         $oldTerminalLocation = $order->getShipping()->getTerminalLocation();
 
         if (
-            $oldTerminalLocation === null
-            || $oldTerminalLocation->getTerminalId() === $newTerminalLocation->getTerminalId()
+            $oldTerminalLocation !== null
+            && $oldTerminalLocation->getTerminalId() === $newTerminalLocation->getTerminalId()
         ) {
             return;
         }
@@ -210,6 +218,6 @@ class DeliveryOrderCallbackService
             $currData[$prefix . $key] = $value;
         }
 
-        $this->merchantOrderLogger->logShippingChanges($order, $currData, $prevData);
+        $this->merchantOrderLogger->logShippingChanges($order, $prevData, $currData);
     }
 }

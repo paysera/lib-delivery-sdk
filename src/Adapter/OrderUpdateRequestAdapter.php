@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Paysera\DeliverySdk\Adapter;
 
 use Paysera\DeliveryApi\MerchantClient\Entity\OrderUpdate;
+use Paysera\DeliveryApi\MerchantClient\Entity\ShipmentPointCreate;
 use Paysera\DeliverySdk\Entity\PayseraDeliveryOrderRequest;
 use Paysera\DeliverySdk\Exception\UndefinedDeliveryGatewayException;
 use Paysera\DeliverySdk\Util\DeliveryGatewayUtils;
@@ -45,7 +46,13 @@ class OrderUpdateRequestAdapter
                 $this->gatewayUtils->getShipmentMethodCode($deliveryGateway->getSettings())
             )
             ->setShipments([...$this->shipmentsAdapter->convert($orderDto->getItems())])
-            ->setReceiver($this->shipmentPointAdapter->convert($orderDto->getShipping()))
+            ->setReceiver(
+                $this->shipmentPointAdapter->convert(
+                    $orderDto->getShipping(),
+                    $request->getDeliverySettings(),
+                    ShipmentPointCreate::TYPE_RECEIVER,
+                ),
+            )
             ->setEshopOrderId($orderDto->getNumber())
         ;
 

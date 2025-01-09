@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Paysera\DeliverySdk\Tests;
 
 use Paysera\DeliverySdk\DeliveryFacadeFactory;
+use Paysera\DeliverySdk\Entity\DeliveryTerminalLocationFactoryInterface;
 use Paysera\DeliverySdk\Repository\DeliveryGatewayRepositoryInterface;
 use Paysera\DeliverySdk\Repository\MerchantOrderRepositoryInterface;
 use Paysera\DeliverySdk\Service\DeliveryLoggerInterface;
@@ -32,6 +33,10 @@ class DeliveryFacadeFactoryTest extends TestCase
             ->set(
                 DeliveryGatewayRepositoryInterface::class,
                 $this->createMock(DeliveryGatewayRepositoryInterface::class)
+            )
+            ->set(
+                DeliveryTerminalLocationFactoryInterface::class,
+                $this->createMock(DeliveryTerminalLocationFactoryInterface::class)
             )
         ;
 

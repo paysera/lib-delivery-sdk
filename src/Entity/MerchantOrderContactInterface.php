@@ -12,11 +12,11 @@ interface MerchantOrderContactInterface
 
     public function getCompany(): ?string;
 
-    public function setPhone(string $phone): self;
+    public function setPhone(?string $phone): self;
 
     public function getPhone(): string;
 
-    public function setEmail(string $email): self;
+    public function setEmail(?string $email): self;
 
     public function getEmail(): string;
 }

@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Paysera\DeliverySdk\Service;
 
-use Exception;
+use Throwable;
 
 interface DeliveryLoggerInterface
 {
     public function info(string $message): void;
 
-    public function error(string $message, Exception $exception = null): void;
+    public function error(string $message, Throwable $exception = null): void;
 }

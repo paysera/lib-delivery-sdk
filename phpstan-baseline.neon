@@ -6,16 +6,6 @@ parameters:
 			path: src/Collection/OrderItemsCollection.php
 
 		-
-			message: "#^Parameter \\#1 \\$deliveryOrderService of class Paysera\\\\DeliverySdk\\\\DeliveryFacade constructor expects Paysera\\\\DeliverySdk\\\\Service\\\\DeliveryOrderService, object given\\.$#"
-			count: 1
-			path: src/DeliveryFacadeFactory.php
-
-		-
-			message: "#^Parameter \\#2 \\$deliveryOrderCallbackService of class Paysera\\\\DeliverySdk\\\\DeliveryFacade constructor expects Paysera\\\\DeliverySdk\\\\Service\\\\DeliveryOrderCallbackService, object given\\.$#"
-			count: 1
-			path: src/DeliveryFacadeFactory.php
-
-		-
 			message: "#^Interface Paysera\\\\DeliverySdk\\\\Entity\\\\DeliveryTerminalLocationInterface extends generic interface ArrayAccess but does not specify its types\\: TKey, TValue$#"
 			count: 1
 			path: src/Entity/DeliveryTerminalLocationInterface.php
@@ -49,6 +39,11 @@ parameters:
 			message: "#^Property Paysera\\\\DeliverySdk\\\\Exception\\\\UndefinedDeliveryGatewayException\\:\\:\\$message has no type specified\\.$#"
 			count: 1
 			path: src/Exception/UndefinedDeliveryGatewayException.php
+
+		-
+			message: "#^Property Paysera\\\\DeliverySdk\\\\Exception\\\\UndefinedDeliveryOrderException\\:\\:\\$message has no type specified\\.$#"
+			count: 1
+			path: src/Exception/UndefinedDeliveryOrderException.php
 
 		-
 			message: "#^Method Paysera\\\\DeliverySdk\\\\Util\\\\Container\\:\\:getDependencies\\(\\) return type has no value type specified in iterable type array\\.$#"

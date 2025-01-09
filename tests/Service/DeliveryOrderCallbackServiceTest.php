@@ -15,6 +15,7 @@ use Paysera\DeliveryApi\MerchantClient\Entity\ShipmentMethod;
 use Paysera\DeliveryApi\MerchantClient\Entity\ShipmentPoint;
 use Paysera\DeliverySdk\Client\DeliveryApiClient;
 use Paysera\DeliverySdk\Dto\ObjectStateDto;
+use Paysera\DeliverySdk\Entity\DeliveryTerminalLocationFactoryInterface;
 use Paysera\DeliverySdk\Entity\DeliveryTerminalLocationInterface;
 use Paysera\DeliverySdk\Entity\MerchantOrderAddressInterface;
 use Paysera\DeliverySdk\Entity\MerchantOrderContactInterface;
@@ -50,6 +51,7 @@ class DeliveryOrderCallbackServiceTest extends TestCase
         $this->objectStateService = $this->createMock(ObjectStateService::class);
         $this->merchantOrderLogger = $this->createMock(MerchantOrderLoggerInterface::class);
         $this->deliveryGatewayRepository = $this->createMock(DeliveryGatewayRepositoryInterface::class);
+        $this->deliveryTerminalLocationFactory = $this->createMock(DeliveryTerminalLocationFactoryInterface::class);
         $this->gatewayUtils = new DeliveryGatewayUtils();
 
         $this->service = new DeliveryOrderCallbackService(
@@ -58,7 +60,8 @@ class DeliveryOrderCallbackServiceTest extends TestCase
             $this->merchantOrderRepository,
             $this->merchantOrderLogger,
             $this->deliveryGatewayRepository,
-            $this->gatewayUtils
+            $this->gatewayUtils,
+            $this->deliveryTerminalLocationFactory
         );
     }
 
@@ -141,15 +144,6 @@ class DeliveryOrderCallbackServiceTest extends TestCase
             ->with(
                 $merchantOrder,
                 [
-                    'shipping.contact.phone' => 'new_phone',
-                    'shipping.contact.email' => 'new@email',
-                    'shipping.address.country' => 'NewCountry',
-                    'shipping.address.city' => 'NewCity',
-                    'shipping.address.street' => 'NewStreet',
-                    'shipping.address.postalCode' => '06677',
-                    'shipping.address.houseNumber' => '2334',
-                ],
-                [
                     'shipping.contact.phone' => 'old_phone',
                     'shipping.contact.email' => 'old@email',
                     'shipping.address.country' => 'OldCountry',
@@ -158,12 +152,21 @@ class DeliveryOrderCallbackServiceTest extends TestCase
                     'shipping.address.postalCode' => '05566',
                     'shipping.address.houseNumber' => '1223',
                 ],
+                [
+                    'shipping.contact.phone' => 'new_phone',
+                    'shipping.contact.email' => 'new@email',
+                    'shipping.address.country' => 'NewCountry',
+                    'shipping.address.city' => 'NewCity',
+                    'shipping.address.street' => 'NewStreet',
+                    'shipping.address.postalCode' => '06677',
+                    'shipping.address.houseNumber' => '2334',
+                ],
             )
         ;
 
         $this->objectStateService->method('diffState')->willReturn($diffState);
         $this->merchantOrderRepository->expects($this->once())->method('save')->with($merchantOrder);
-        $this->deliveryGatewayRepository->method('findPayseraGateway')->willReturn($deliveryGateway);
+        $this->deliveryGatewayRepository->method('findPayseraGatewayForDeliveryOrder')->willReturn($deliveryGateway);
 
         $this->service->updateMerchantOrder($deliveryOrderRequest);
     }
@@ -188,6 +191,13 @@ class DeliveryOrderCallbackServiceTest extends TestCase
 
         $deliveryOrderRequest = $this->createMock(PayseraDeliveryOrderRequest::class);
 
+        $newTerminalLocation = $this->createMock(DeliveryTerminalLocationInterface::class);
+
+        $this->deliveryTerminalLocationFactory
+            ->expects($this->once())
+            ->method('create')
+            ->willReturn($newTerminalLocation);
+
         $this->merchantOrderLogger
             ->expects($this->once())
             ->method('logDeliveryTerminalLocationChanges')
@@ -199,7 +209,7 @@ class DeliveryOrderCallbackServiceTest extends TestCase
 
         $deliveryOrderRequest->method('getOrder')->willReturn($merchantOrder);
         $this->apiClient->method('getOrder')->willReturn($deliveryOrder);
-        $this->deliveryGatewayRepository->method('findPayseraGateway')->willReturn($deliveryGateway);
+        $this->deliveryGatewayRepository->method('findPayseraGatewayForDeliveryOrder')->willReturn($deliveryGateway);
 
         $this->merchantOrderRepository->expects($this->exactly(2))->method('save')->with($merchantOrder);
 
@@ -215,7 +225,7 @@ class DeliveryOrderCallbackServiceTest extends TestCase
 
         $deliveryOrderRequest->method('getOrder')->willReturn($merchantOrder);
         $this->apiClient->method('getOrder')->willReturn($deliveryOrder);
-        $this->deliveryGatewayRepository->method('findPayseraGateway')->willReturn(null);
+        $this->deliveryGatewayRepository->method('findPayseraGatewayForDeliveryOrder')->willReturn(null);
 
         $this->expectException(UndefinedDeliveryGatewayException::class);
 
@@ -231,7 +241,7 @@ class DeliveryOrderCallbackServiceTest extends TestCase
 
         $deliveryOrderRequest->method('getOrder')->willReturn($merchantOrder);
         $this->apiClient->method('getOrder')->willReturn($deliveryOrder);
-        $this->deliveryGatewayRepository->method('findPayseraGateway')->willReturn(null);
+        $this->deliveryGatewayRepository->method('findPayseraGatewayForDeliveryOrder')->willReturn(null);
 
         $this->expectException(DeliveryGatewayNotFoundException::class);
 
@@ -279,6 +289,9 @@ class DeliveryOrderCallbackServiceTest extends TestCase
 
         $terminalLocation = $this->createMock(DeliveryTerminalLocationInterface::class);
         $terminalLocation->method('getTerminalId')->willReturn('OLD123');
+        $terminalLocation->method('getCountry')->willReturn('OldCountry');
+        $terminalLocation->method('getCity')->willReturn('oldCity');
+        $terminalLocation->method('getDeliveryGatewayCode')->willReturn('old_gateway_code');
 
         $shipping = $this->createMock(MerchantOrderPartyInterface::class);
         $shipping->method('getContact')->willReturn($contact);

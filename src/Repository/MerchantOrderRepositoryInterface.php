@@ -8,7 +8,5 @@ use Paysera\DeliverySdk\Entity\MerchantOrderInterface;
 
 interface MerchantOrderRepositoryInterface
 {
-    public function findByNumber(string $number): MerchantOrderInterface;
-
     public function save(MerchantOrderInterface $order): void;
 }
