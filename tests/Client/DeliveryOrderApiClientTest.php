@@ -106,6 +106,29 @@ class DeliveryOrderApiClientTest extends TestCase
         $this->assertSame($this->orderMock, $result);
     }
 
+    public function testPrepaid(): void
+    {
+        $orderDtoMock = $this->createMock(MerchantOrderInterface::class);
+
+        $this->deliveryOrderRequestMock->method('getOrder')
+            ->willReturn($orderDtoMock)
+        ;
+
+        $orderDtoMock->method('getDeliveryOrderId')
+            ->willReturn('123456')
+        ;
+
+        $this->merchantClientProviderMock->method('getMerchantClient')
+            ->willReturn($this->merchantClientMock)
+        ;
+
+        $this->merchantClientMock->expects($this->once())
+            ->method('createOrdersPrepaid')
+        ;
+
+        $this->deliveryOrderApiClient->prepaid($this->deliveryOrderRequestMock);
+    }
+
     public function testGet(): void
     {
         $deliverySettingsMock = $this->createMock(PayseraDeliverySettingsInterface::class);

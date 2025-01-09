@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Paysera\DeliverySdk\Client;
 
 use Paysera\DeliveryApi\MerchantClient\Entity\Order;
+use Paysera\DeliveryApi\MerchantClient\Entity\OrderIdsList;
 use Paysera\DeliverySdk\Adapter\DeliveryOrderRequestAdapterFacade;
 use Paysera\DeliverySdk\Client\Provider\MerchantClientProvider;
 use Paysera\DeliverySdk\Entity\PayseraDeliveryOrderRequest;
@@ -61,6 +62,30 @@ class DeliveryOrderApiClient
                 $deliveryOrderId,
                 $this->orderRequestAdapter->convertUpdate($deliveryOrderRequest)
             )
+        ;
+    }
+
+    /**
+     * @throws \Paysera\DeliverySdk\Exception\MerchantClientNotFoundException
+     * @throws UndefinedDeliveryOrderException
+     */
+    public function prepaid(PayseraDeliveryOrderRequest $deliveryOrderRequest)
+    {
+        $deliveryOrderId = $deliveryOrderRequest->getOrder()->getDeliveryOrderId();
+        if ($deliveryOrderId === null) {
+            throw new UndefinedDeliveryOrderException($deliveryOrderRequest->getOrder());
+        }
+
+        $orderIdsList = new OrderIdsList([
+            'order_ids' => [
+                $deliveryOrderId
+            ],
+        ]);
+
+        $this
+            ->merchantClientProvider
+            ->getMerchantClient($deliveryOrderRequest->getDeliverySettings())
+            ->createOrdersPrepaid($orderIdsList)
         ;
     }
 
