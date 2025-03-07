@@ -14,7 +14,7 @@ use Paysera\DeliverySdk\Service\DeliveryLoggerInterface;
 class MerchantClientProvider
 {
     private const DEFAULT_BASE_URL = 'https://delivery-api.paysera.com/rest/v1/';
-
+    private const TEST_MODE_HEADER_NAME = 'Paysera-Test-Mode';
     private DeliveryLoggerInterface $logger;
 
     public function __construct(DeliveryLoggerInterface $logger)
@@ -26,34 +26,34 @@ class MerchantClientProvider
     {
         $macId = $deliverySettings->getProjectId();
         $macSecret = $deliverySettings->getProjectPassword();
-
         if ($macId === null || $macSecret === null) {
             throw new MerchantClientNotFoundException();
         }
 
-        $clientFactory = new ClientFactory([
+        $settings = [
             'base_url' => $this->getBaseUrl(),
             'mac' => [
                 'mac_id' => $macId,
-                'mac_secret' => $macSecret,
-            ],
-        ]);
+                'mac_secret' => $macSecret
+            ]
+        ];
+        if ($deliverySettings->isTestModeEnabled()) {
+            $settings['headers'] = [self::TEST_MODE_HEADER_NAME => true];
+        }
+        $clientFactory = new ClientFactory($settings);
 
         try {
             $merchantClient = $clientFactory->getMerchantClient();
         } catch (Exception $exception) {
             $this->logger->error('Cannot create merchant client', $exception);
-
             throw new MerchantClientNotFoundException();
         }
-
         return $merchantClient;
     }
 
     private function getBaseUrl(): string
     {
-        $url = getenv('DELIVERY_API_URL');
-
+        $url = \getenv('DELIVERY_API_URL');
         return !empty($url) ? $url : self::DEFAULT_BASE_URL;
     }
 }
