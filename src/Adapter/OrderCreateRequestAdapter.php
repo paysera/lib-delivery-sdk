@@ -54,6 +54,7 @@ class OrderCreateRequestAdapter
                 ),
             )
             ->setEshopOrderId($orderDto->getNumber())
+            ->setTestMode($orderDto->getTestMode())
         ;
 
         $projectId = $request->getDeliverySettings()->getResolvedProjectId();
