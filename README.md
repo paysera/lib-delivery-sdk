@@ -14,7 +14,7 @@ While in under developing:
 {
     "require": {
         "php": ">=7.4",
-        "paysera/lib-delivery-sdk": "^0.1",
+        "paysera/lib-delivery-sdk": "^0.2",
     },
     "repositories": [
         {
