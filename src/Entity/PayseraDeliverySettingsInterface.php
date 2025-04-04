@@ -20,4 +20,5 @@ interface PayseraDeliverySettingsInterface
     public function isTestModeEnabled(): ?bool;
 
     public function isHouseNumberFieldEnabled(): ?bool;
+    public function getUserAgent(): ?string;
 }
