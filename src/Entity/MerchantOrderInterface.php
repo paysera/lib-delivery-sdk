@@ -35,5 +35,6 @@ interface MerchantOrderInterface extends ArrayAccess
     public function setDeliveryGateway(PayseraDeliveryGatewayInterface $deliveryGateway): self;
 
     public function setTestMode(bool $testMode): self;
+
     public function getTestMode(): bool;
 }
