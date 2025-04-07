@@ -37,14 +37,15 @@ class MerchantClientProvider
                 'mac_id' => $macId,
                 'mac_secret' => $macSecret,
             ],
+            'headers' => [
+                self::USER_AGENT_HEADER_NAME => $deliverySettings->getUserAgent()
+            ],
         ];
 
         if ($deliverySettings->isTestModeEnabled()) {
-            $settings['headers'] = [self::TEST_MODE_HEADER_NAME => true];
+            $settings['headers'][self::TEST_MODE_HEADER_NAME] = true;
         }
-        if ($deliverySettings->getUserAgent()) {
-            $settings['headers'] = [self::USER_AGENT_HEADER_NAME => $deliverySettings->getUserAgent()];
-        }
+
         $clientFactory = new ClientFactory($settings);
 
         try {
