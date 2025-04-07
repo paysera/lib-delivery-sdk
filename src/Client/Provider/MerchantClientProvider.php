@@ -58,7 +58,7 @@ class MerchantClientProvider
 
     private function getBaseUrl(): string
     {
-        $url = \getenv('DELIVERY_API_URL');
+        $url = getenv('DELIVERY_API_URL');
         return !empty($url) ? $url : self::DEFAULT_BASE_URL;
     }
 }
