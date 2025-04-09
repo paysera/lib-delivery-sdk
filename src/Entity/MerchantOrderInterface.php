@@ -36,5 +36,5 @@ interface MerchantOrderInterface extends ArrayAccess
 
     public function setTestMode(bool $testMode): self;
 
-    public function getTestMode(): bool;
+    public function isTestMode(): bool;
 }
