@@ -86,7 +86,7 @@ class OrderCreateRequestAdapterTest extends TestCase
         $this->merchantOrderMock->method('getNumber')->willReturn('ORDER123');
 
         $this->merchantOrderMock
-            ->method('getTestMode')
+            ->method('isTestMode')
             ->willReturn(true)
         ;
 
