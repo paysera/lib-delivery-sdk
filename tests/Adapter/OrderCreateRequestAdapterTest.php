@@ -84,6 +84,12 @@ class OrderCreateRequestAdapterTest extends TestCase
             ->willReturn('gatewayCode')
         ;
         $this->merchantOrderMock->method('getNumber')->willReturn('ORDER123');
+
+        $this->merchantOrderMock
+            ->method('isTestMode')
+            ->willReturn(true)
+        ;
+
         $this->deliverySettingsMock->method('getResolvedProjectId')->willReturn('123');
 
         $this->shipmentsAdapterMock

@@ -14,7 +14,6 @@ use Paysera\DeliverySdk\Client\Provider\MerchantClientProvider;
 use Paysera\DeliverySdk\Entity\MerchantOrderInterface;
 use Paysera\DeliverySdk\Entity\PayseraDeliveryOrderRequest;
 use Paysera\DeliverySdk\Entity\PayseraDeliverySettingsInterface;
-use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 class DeliveryOrderApiClientTest extends TestCase

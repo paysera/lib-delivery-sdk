@@ -21,7 +21,7 @@
     ],
     "require": {
         "php": ">=7.4",
-        "paysera/lib-delivery-api-merchant-client": "^1.0.0",
+        "paysera/lib-delivery-api-merchant-client": "^1.2.0",
         "psr/container": "^2.0",
         "webtopay/libwebtopay": "^3.1"
     },
