@@ -16,13 +16,24 @@ class ShipmentsAdapter
      */
     public function convert(OrderItemsCollection $items): iterable
     {
+        $totalWeight = 0.0;
+        $maxLength = 0.0;
+        $maxWidth = 0.0;
+        $totalHeight = 0.0;
+
         foreach ($items as $item) {
-            yield (new ShipmentCreate())
-                ->setHeight($item->getHeight())
-                ->setWidth($item->getWidth())
-                ->setLength($item->getLength())
-                ->setWeight($item->getWeight())
-            ;
+            $totalWeight += $item->getWeight();
+            $totalHeight += $item->getHeight();
+            $maxLength = max($maxLength, $item->getLength());
+            $maxWidth = max($maxWidth, $item->getWidth());
         }
+
+        return [
+            (new ShipmentCreate())
+                ->setLength($maxLength)
+                ->setWidth($maxWidth)
+                ->setHeight($totalHeight)
+                ->setWeight($totalWeight),
+        ];
     }
 }

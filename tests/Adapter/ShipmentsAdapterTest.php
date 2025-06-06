@@ -48,7 +48,7 @@ class ShipmentsAdapterTest extends TestCase
             ],
         ];
 
-        foreach ($mockData as $index => $mockEntry) {
+        foreach ($mockData as $mockEntry) {
             $mock = $mockEntry['mock'];
             foreach ($mockEntry['data'] as $method => $value) {
                 $mock->method($method)->willReturn($value);
@@ -57,14 +57,53 @@ class ShipmentsAdapterTest extends TestCase
 
         $shipments = [...$this->shipmentsAdapter->convert($this->itemsMockCollection)];
 
-        $this->assertCount(2, $shipments);
+        $this->assertCount(1, $shipments);
+        $shipment = $shipments[0];
 
-        foreach ($shipments as $index => $shipment) {
-            $mockDataEntry = $mockData[$index]['data'];
-            foreach ($mockDataEntry as $method => $expectedValue) {
-                $property = lcfirst(substr($method, 3));
-                $this->assertSame($expectedValue, $shipment->{"get" . ucfirst($property)}());
-            }
+        $this->assertEquals(70, $shipment->getLength());
+        $this->assertEquals(60, $shipment->getWidth());
+
+        $this->assertEquals(60, $shipment->getHeight());
+        $this->assertEquals(120, $shipment->getWeight());
+    }
+
+    public function testConvertWithFiveItems(): void
+    {
+        $items = [];
+        $totalHeight = 0.0;
+        $totalWeight = 0.0;
+        $maxLength = 0.0;
+        $maxWidth = 0.0;
+
+        for ($i = 1; $i <= 5; $i++) {
+            $height = 5 * $i;
+            $width = 10 * $i;
+            $length = 15 * $i;
+            $weight = 2 * $i;
+
+            $mock = $this->createMock(MerchantOrderItemInterface::class);
+            $mock->method('getHeight')->willReturn($height);
+            $mock->method('getWidth')->willReturn($width);
+            $mock->method('getLength')->willReturn($length);
+            $mock->method('getWeight')->willReturn($weight);
+
+            $items[] = $mock;
+
+            $totalHeight += $height;
+            $totalWeight += $weight;
+            $maxLength = max($maxLength, $length);
+            $maxWidth = max($maxWidth, $width);
         }
+
+        $collection = new OrderItemsCollection($items);
+        $shipments = [...$this->shipmentsAdapter->convert($collection)];
+
+        $this->assertCount(1, $shipments);
+        $shipment = $shipments[0];
+
+        $this->assertSame($maxLength, $shipment->getLength());
+        $this->assertSame($maxWidth, $shipment->getWidth());
+        $this->assertSame($totalHeight, $shipment->getHeight());
+        $this->assertSame($totalWeight, $shipment->getWeight());
     }
 }
