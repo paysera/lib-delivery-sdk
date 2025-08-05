@@ -19,7 +19,7 @@ While in under developing:
     "repositories": [
         {
             "type": "vcs",
-            "url": "https://github.com/enigma-tm/lib-delivery-sdk"
+            "url": "https://github.com/paysera/lib-delivery-sdk"
         }
     ]
 }

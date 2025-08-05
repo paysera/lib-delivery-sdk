@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "863c51f0c3b5cfe21e5720ca571d45e0",
+    "content-hash": "4cad416d26841d6ff17c8214977d3f1a",
     "packages": [
         {
             "name": "evp/money",
@@ -536,16 +536,16 @@
         },
         {
             "name": "paysera/lib-delivery-api-merchant-client",
-            "version": "1.2.0",
+            "version": "1.2.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/paysera/lib-delivery-api-merchant-client.git",
-                "reference": "2816ffef281a5cf919133e313b112ee1b562a63c"
+                "reference": "263496744b42f1fb10767636fba05efea743a783"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/paysera/lib-delivery-api-merchant-client/zipball/2816ffef281a5cf919133e313b112ee1b562a63c",
-                "reference": "2816ffef281a5cf919133e313b112ee1b562a63c",
+                "url": "https://api.github.com/repos/paysera/lib-delivery-api-merchant-client/zipball/263496744b42f1fb10767636fba05efea743a783",
+                "reference": "263496744b42f1fb10767636fba05efea743a783",
                 "shasum": ""
             },
             "require": {
@@ -564,9 +564,9 @@
             "description": "Paysera Delivery Api Merchant Client",
             "support": {
                 "issues": "https://github.com/paysera/lib-delivery-api-merchant-client/issues",
-                "source": "https://github.com/paysera/lib-delivery-api-merchant-client/tree/1.2.0"
+                "source": "https://github.com/paysera/lib-delivery-api-merchant-client/tree/1.2.1"
             },
-            "time": "2025-04-01T11:12:57+00:00"
+            "time": "2025-04-29T10:04:12+00:00"
         },
         {
             "name": "paysera/lib-rest-client-common",
@@ -5469,5 +5469,5 @@
         "php": ">=7.4"
     },
     "platform-dev": [],
-    "plugin-api-version": "2.2.0"
+    "plugin-api-version": "2.6.0"
 }
