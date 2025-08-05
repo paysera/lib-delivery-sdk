@@ -81,7 +81,7 @@ class Container implements ContainerInterface
         if (!class_exists($className)) {
             throw new ContainerCreationFaultException("Class $className does not exist");
         }
-        
+
         $reflector = new ReflectionClass($className);
 
         if (!$reflector->isInstantiable()) {

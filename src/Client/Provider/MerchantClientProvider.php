@@ -38,7 +38,7 @@ class MerchantClientProvider
                 'mac_secret' => $macSecret,
             ],
             'headers' => [
-                self::USER_AGENT_HEADER_NAME => $deliverySettings->getUserAgent()
+                self::USER_AGENT_HEADER_NAME => $deliverySettings->getUserAgent(),
             ],
         ];
 
