@@ -63,7 +63,8 @@ class ShipmentsAdapter
                 ->setHeight($item->getHeight())
                 ->setWidth($item->getWidth())
                 ->setLength($item->getLength())
-                ->setWeight($item->getWeight());
+                ->setWeight($item->getWeight())
+            ;
         }
     }
 }
