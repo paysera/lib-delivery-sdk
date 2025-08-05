@@ -45,10 +45,10 @@ class ShipmentsAdapter
 
         return [
             (new ShipmentCreate())
-                ->setLength($maxLength)
-                ->setWidth($maxWidth)
-                ->setHeight($totalHeight)
-                ->setWeight($totalWeight),
+                ->setLength((int) $maxLength)
+                ->setWidth((int) $maxWidth)
+                ->setHeight((int) $totalHeight)
+                ->setWeight((int) $totalWeight),
         ];
     }
 
