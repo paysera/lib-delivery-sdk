@@ -17,7 +17,6 @@ class DeliveryOrderRequestAdapterFacade
         OrderCreateRequestAdapter $createAdapter,
         OrderUpdateRequestAdapter $updateAdapter
     ) {
-
         $this->createAdapter = $createAdapter;
         $this->updateAdapter = $updateAdapter;
     }
