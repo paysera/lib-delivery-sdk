@@ -17,9 +17,9 @@ class ShipmentsAdapter
      */
     public function convert(
         OrderItemsCollection $items,
-        PayseraDeliverySettingsInterface $payseraDeliverySettings
+        bool $isSinglePerOrderShipmentEnabled = false
     ): iterable {
-        if ($payseraDeliverySettings->isSinglePerOrderShipmentEnabled()) {
+        if ($isSinglePerOrderShipmentEnabled) {
             return $this->createSingleShipment($items);
         }
         return $this->createMultipleShipments($items);
@@ -31,24 +31,24 @@ class ShipmentsAdapter
      */
     private function createSingleShipment(OrderItemsCollection $items): iterable
     {
-        $totalWeight = 0.0;
-        $maxLength = 0.0;
-        $maxWidth = 0.0;
-        $totalHeight = 0.0;
+        $width = 0.0;
+        $height = 0.0;
+        $length = 0.0;
+        $weight = 0.0;
 
         foreach ($items as $item) {
-            $totalWeight += $item->getWeight();
-            $totalHeight += $item->getHeight();
-            $maxLength = max($maxLength, $item->getLength());
-            $maxWidth = max($maxWidth, $item->getWidth());
+            $width += floor($item->getWidth());
+            $height += floor($item->getHeight());
+            $length += floor($item->getLength());
+            $weight += floor($item->getWeight());
         }
 
         return [
             (new ShipmentCreate())
-                ->setLength((int) $maxLength)
-                ->setWidth((int) $maxWidth)
-                ->setHeight((int) $totalHeight)
-                ->setWeight((int) $totalWeight),
+                ->setLength((int) $length)
+                ->setWidth((int) $width)
+                ->setHeight((int) $height)
+                ->setWeight((int) $weight),
         ];
     }
 

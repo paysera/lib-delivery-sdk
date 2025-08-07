@@ -79,6 +79,7 @@ class OrderUpdateRequestAdapterTest extends TestCase
             ->method('getResolvedProjectId')
             ->willReturn('123')
         ;
+        $this->deliverySettingsMock->method('isSinglePerOrderShipmentEnabled')->willReturn(false);
 
         $this->shipmentsAdapterMock
             ->method('convert')
@@ -137,6 +138,7 @@ class OrderUpdateRequestAdapterTest extends TestCase
             ->method('getResolvedProjectId')
             ->willReturn(null)
         ;
+        $this->deliverySettingsMock->method('isSinglePerOrderShipmentEnabled')->willReturn(false);
         $this->merchantOrderMock
             ->method('getNotificationCallback')
             ->willReturn(null)

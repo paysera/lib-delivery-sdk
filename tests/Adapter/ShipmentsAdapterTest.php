@@ -33,7 +33,7 @@ class ShipmentsAdapterTest extends TestCase
             ->method('isSinglePerOrderShipmentEnabled')
             ->willReturn(false);
 
-        $shipments = [...$this->shipmentsAdapter->convert($this->itemsCollection, $this->settingsMock)];
+        $shipments = [...$this->shipmentsAdapter->convert($this->itemsCollection, false)];
 
         $this->assertCount(2, $shipments);
 
@@ -57,7 +57,7 @@ class ShipmentsAdapterTest extends TestCase
             ->method('isSinglePerOrderShipmentEnabled')
             ->willReturn(true);
 
-        $shipments = [...$this->shipmentsAdapter->convert($this->itemsCollection, $this->settingsMock)];
+        $shipments = [...$this->shipmentsAdapter->convert($this->itemsCollection, true)];
 
         $this->assertCount(1, $shipments);
         $shipment = $shipments[0];

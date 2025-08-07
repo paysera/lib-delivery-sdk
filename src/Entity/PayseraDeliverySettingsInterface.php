@@ -22,5 +22,6 @@ interface PayseraDeliverySettingsInterface
     public function isHouseNumberFieldEnabled(): ?bool;
 
     public function getUserAgent(): string;
+
     public function isSinglePerOrderShipmentEnabled(): bool;
 }
