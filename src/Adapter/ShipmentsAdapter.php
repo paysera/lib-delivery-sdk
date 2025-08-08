@@ -47,7 +47,7 @@ class ShipmentsAdapter
                 ->setLength((int) ceil($length))
                 ->setWidth((int) ceil($width))
                 ->setHeight((int) ceil($height))
-                ->setWeight((int) ceil($weight))
+                ->setWeight((int) ceil($weight)),
         ];
     }
 
