@@ -36,18 +36,18 @@ class ShipmentsAdapter
         $weight = 0;
 
         foreach ($items as $item) {
-            $width += ceil($item->getWidth());
-            $height += ceil($item->getHeight());
-            $length += ceil($item->getLength());
-            $weight += ceil($item->getWeight());
+            $width += $item->getWidth();
+            $height += $item->getHeight();
+            $length += $item->getLength();
+            $weight += $item->getWeight();
         }
 
         return [
             (new ShipmentCreate())
-                ->setLength((int) $length)
-                ->setWidth((int) $width)
-                ->setHeight((int) $height)
-                ->setWeight((int) $weight),
+                ->setLength((int) ceil($length))
+                ->setWidth((int) ceil($width))
+                ->setHeight((int) ceil($height))
+                ->setWeight((int) ceil($weight))
         ];
     }
 
