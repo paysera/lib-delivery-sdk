@@ -4,67 +4,77 @@ declare(strict_types=1);
 
 namespace Paysera\DeliverySdk\Tests\phpunit\Adapter;
 
-use ArrayIterator;
 use Paysera\DeliverySdk\Adapter\ShipmentsAdapter;
 use Paysera\DeliverySdk\Collection\OrderItemsCollection;
 use Paysera\DeliverySdk\Entity\MerchantOrderItemInterface;
+use Paysera\DeliverySdk\Entity\PayseraDeliverySettingsInterface;
 use PHPUnit\Framework\TestCase;
 
 class ShipmentsAdapterTest extends TestCase
 {
     private ShipmentsAdapter $shipmentsAdapter;
-    private MerchantOrderItemInterface $itemMock1;
-    private MerchantOrderItemInterface $itemMock2;
-    private OrderItemsCollection $itemsMockCollection;
+    private PayseraDeliverySettingsInterface $settingsMock;
+    private OrderItemsCollection $itemsCollection;
 
     protected function setUp(): void
     {
         $this->shipmentsAdapter = new ShipmentsAdapter();
-        $this->itemMock1 = $this->createMock(MerchantOrderItemInterface::class);
-        $this->itemMock2 = $this->createMock(MerchantOrderItemInterface::class);
-        $this->itemsMockCollection = new OrderItemsCollection([$this->itemMock1, $this->itemMock2]);
+        $this->settingsMock = $this->createMock(PayseraDeliverySettingsInterface::class);
+
+        $item1 = $this->createItemMock(10, 20, 30, 40);
+        $item2 = $this->createItemMock(50, 60, 70, 80);
+
+        $this->itemsCollection = new OrderItemsCollection([$item1, $item2]);
     }
 
-    public function testConvert(): void
+    public function testConvertWithMultipleShipments(): void
     {
-        $mockData = [
-            [
-                'mock' => $this->itemMock1,
-                'data' => [
-                    'getHeight' => 10,
-                    'getWidth' => 20,
-                    'getLength' => 30,
-                    'getWeight' => 40,
-                ],
-            ],
-            [
-                'mock' => $this->itemMock2,
-                'data' => [
-                    'getHeight' => 50,
-                    'getWidth' => 60,
-                    'getLength' => 70,
-                    'getWeight' => 80,
-                ],
-            ],
-        ];
+        $this->settingsMock
+            ->method('isSinglePerOrderShipmentEnabled')
+            ->willReturn(false);
 
-        foreach ($mockData as $index => $mockEntry) {
-            $mock = $mockEntry['mock'];
-            foreach ($mockEntry['data'] as $method => $value) {
-                $mock->method($method)->willReturn($value);
-            }
-        }
-
-        $shipments = [...$this->shipmentsAdapter->convert($this->itemsMockCollection)];
+        $shipments = [...$this->shipmentsAdapter->convert($this->itemsCollection)];
 
         $this->assertCount(2, $shipments);
 
-        foreach ($shipments as $index => $shipment) {
-            $mockDataEntry = $mockData[$index]['data'];
-            foreach ($mockDataEntry as $method => $expectedValue) {
-                $property = lcfirst(substr($method, 3));
-                $this->assertSame($expectedValue, $shipment->{"get" . ucfirst($property)}());
-            }
+        $expectedValues = [
+            [30, 20, 10, 40],
+            [70, 60, 50, 80],
+        ];
+
+        foreach ($shipments as $i => $shipment) {
+            [$length, $width, $height, $weight] = $expectedValues[$i];
+            $this->assertEquals($length, $shipment->getLength());
+            $this->assertEquals($width, $shipment->getWidth());
+            $this->assertEquals($height, $shipment->getHeight());
+            $this->assertEquals($weight, $shipment->getWeight());
         }
+    }
+
+    public function testConvertWithSingleShipment(): void
+    {
+        $this->settingsMock
+            ->method('isSinglePerOrderShipmentEnabled')
+            ->willReturn(true);
+
+        $shipments = [...$this->shipmentsAdapter->convert($this->itemsCollection, true)];
+
+        $this->assertCount(1, $shipments);
+        $shipment = $shipments[0];
+
+        $this->assertEquals(100, $shipment->getLength());
+        $this->assertEquals(80, $shipment->getWidth());
+        $this->assertEquals(60, $shipment->getHeight());
+        $this->assertEquals(120, $shipment->getWeight());
+    }
+
+    private function createItemMock(int $height, int $width, int $length, int $weight): MerchantOrderItemInterface
+    {
+        $mock = $this->createMock(MerchantOrderItemInterface::class);
+        $mock->method('getHeight')->willReturn($height);
+        $mock->method('getWidth')->willReturn($width);
+        $mock->method('getLength')->willReturn($length);
+        $mock->method('getWeight')->willReturn($weight);
+        return $mock;
     }
 }

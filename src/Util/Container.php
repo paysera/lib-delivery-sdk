@@ -78,6 +78,10 @@ class Container implements ContainerInterface
      */
     protected function createInstance(string $className): object
     {
+        if (!class_exists($className)) {
+            throw new ContainerCreationFaultException("Class $className does not exist");
+        }
+
         $reflector = new ReflectionClass($className);
 
         if (!$reflector->isInstantiable()) {
