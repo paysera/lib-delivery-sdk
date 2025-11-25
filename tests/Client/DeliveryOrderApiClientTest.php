@@ -7,6 +7,7 @@ namespace Paysera\DeliverySdk\Tests\Client;
 use Paysera\DeliveryApi\MerchantClient\Entity\Order;
 use Paysera\DeliveryApi\MerchantClient\Entity\OrderCreate;
 use Paysera\DeliveryApi\MerchantClient\Entity\OrderUpdate;
+use Paysera\DeliveryApi\MerchantClient\Entity\ProjectCredentials;
 use Paysera\DeliveryApi\MerchantClient\MerchantClient;
 use Paysera\DeliverySdk\Adapter\DeliveryOrderRequestAdapterFacade;
 use Paysera\DeliverySdk\Client\DeliveryOrderApiClient;
@@ -165,5 +166,87 @@ class DeliveryOrderApiClientTest extends TestCase
         $result = $this->deliveryOrderApiClient->get($this->deliveryOrderRequestMock);
 
         $this->assertSame($this->orderMock, $result);
+    }
+
+    public function testValidateCredentialsReturnsTrue(): void
+    {
+        $credentials = new ProjectCredentials([
+            'project_id' => '123456',
+            'password' => '6943a905f5a1a5ebd29b4f3c4c15b818',
+        ]);
+
+        $this->merchantClientProviderMock
+            ->expects($this->once())
+            ->method('getPublicMerchantClient')
+            ->willReturn($this->merchantClientMock);
+
+        $this->merchantClientMock
+            ->expects($this->once())
+            ->method('validateProjectCredentials')
+            ->with($this->callback(function ($arg) use ($credentials) {
+                return $arg instanceof ProjectCredentials
+                    && $arg->getProjectId() === $credentials->getProjectId()
+                    && $arg->getPassword() === $credentials->getPassword();
+            }))
+            ->willReturn(true);
+
+        $result = $this->deliveryOrderApiClient->validateCredentials($credentials);
+
+        $this->assertTrue($result);
+    }
+
+    public function testValidateCredentialsReturnsFalse(): void
+    {
+        $credentials = new ProjectCredentials([
+            'project_id' => '123456',
+            'password' => 'invalid_password',
+        ]);
+
+        $this->merchantClientProviderMock
+            ->expects($this->once())
+            ->method('getPublicMerchantClient')
+            ->willReturn($this->merchantClientMock);
+
+        $this->merchantClientMock
+            ->expects($this->once())
+            ->method('validateProjectCredentials')
+            ->with($this->callback(function ($arg) use ($credentials) {
+                return $arg instanceof ProjectCredentials
+                    && $arg->getProjectId() === $credentials->getProjectId()
+                    && $arg->getPassword() === $credentials->getPassword();
+            }))
+            ->willReturn(false);
+
+        $result = $this->deliveryOrderApiClient->validateCredentials($credentials);
+
+        $this->assertFalse($result);
+    }
+
+    public function testValidateCredentialsThrowsRuntimeException(): void
+    {
+        $credentials = new ProjectCredentials([
+            'project_id' => '123456',
+            'password' => '6943a905f5a1a5ebd29b4f3c4c15b818',
+        ]);
+
+        $this->merchantClientProviderMock
+            ->expects($this->once())
+            ->method('getPublicMerchantClient')
+            ->willReturn($this->merchantClientMock);
+
+        $this->merchantClientMock
+            ->expects($this->once())
+            ->method('validateProjectCredentials')
+            ->with($this->callback(function ($arg) use ($credentials) {
+                return $arg instanceof ProjectCredentials
+                    && $arg->getProjectId() === $credentials->getProjectId()
+                    && $arg->getPassword() === $credentials->getPassword();
+            }))
+            ->willThrowException(new \RuntimeException('Rate limit exceeded'));
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Rate limit exceeded');
+
+        $this->deliveryOrderApiClient->validateCredentials($credentials);
     }
 }
