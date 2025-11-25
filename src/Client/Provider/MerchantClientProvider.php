@@ -57,6 +57,30 @@ class MerchantClientProvider
         return $merchantClient;
     }
 
+    /**
+     * @throws MerchantClientNotFoundException
+     */
+    public function getPublicMerchantClient(): MerchantClient
+    {
+        $settings = [
+            'base_url' => $this->getBaseUrl(),
+            'headers' => [
+                self::USER_AGENT_HEADER_NAME => 'Paysera-Delivery-SDK',
+            ],
+        ];
+
+        $clientFactory = new ClientFactory($settings);
+
+        try {
+            $merchantClient = $clientFactory->getMerchantClient();
+        } catch (Exception $exception) {
+            $this->logger->error('Cannot create public merchant client', $exception);
+            throw new MerchantClientNotFoundException();
+        }
+
+        return $merchantClient;
+    }
+
     private function getBaseUrl(): string
     {
         $url = getenv('DELIVERY_API_URL');

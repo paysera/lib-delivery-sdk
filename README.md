@@ -30,6 +30,7 @@ Then, implement all necessary interfaces:
 - [Integration with SDK](docs/BEFORE_USING.md)
 
 ## Use cases
+- [Validating credentials](docs/VALIDATING_CREDENTIALS.md)
 - [Delivery orders creating](docs/DELIVERY_ORDER_CREATING.md)
 - [Delivery orders updating](docs/DELIVERY_ORDER_UPDATING.md)
 - [Callbacks handling](docs/HANDLING_CALLBACKS_FROM_API.md)

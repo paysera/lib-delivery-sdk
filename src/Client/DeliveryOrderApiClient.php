@@ -6,11 +6,13 @@ namespace Paysera\DeliverySdk\Client;
 
 use Paysera\DeliveryApi\MerchantClient\Entity\Order;
 use Paysera\DeliveryApi\MerchantClient\Entity\OrderIdsList;
+use Paysera\DeliveryApi\MerchantClient\Entity\ProjectCredentials;
 use Paysera\DeliverySdk\Adapter\DeliveryOrderRequestAdapterFacade;
 use Paysera\DeliverySdk\Client\Provider\MerchantClientProvider;
 use Paysera\DeliverySdk\Entity\PayseraDeliveryOrderRequest;
 use Paysera\DeliverySdk\Exception\MerchantClientNotFoundException;
 use Paysera\DeliverySdk\Exception\UndefinedDeliveryOrderException;
+use Paysera\Component\RestClientCommon\Exception\ClientException;
 
 class DeliveryOrderApiClient
 {
@@ -104,6 +106,21 @@ class DeliveryOrderApiClient
             ->getOrder(
                 (string)$deliveryOrderRequest->getOrder()->getDeliveryOrderId()
             )
+        ;
+    }
+
+    /**
+     * @param ProjectCredentials $credentials
+     * @return bool
+     * @throws MerchantClientNotFoundException
+     * @throws ClientException
+     */
+    public function validateCredentials(ProjectCredentials $credentials): bool
+    {
+        return $this
+            ->merchantClientProvider
+            ->getPublicMerchantClient()
+            ->validateProjectCredentials($credentials)
         ;
     }
 }

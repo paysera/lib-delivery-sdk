@@ -5,10 +5,14 @@ declare(strict_types=1);
 namespace Paysera\DeliverySdk\Service;
 
 use Paysera\DeliveryApi\MerchantClient\Entity\Order;
+use Paysera\DeliveryApi\MerchantClient\Entity\ProjectCredentials;
 use Paysera\DeliverySdk\Client\DeliveryApiClient;
 use Paysera\DeliverySdk\Entity\MerchantOrderInterface;
 use Paysera\DeliverySdk\Entity\PayseraDeliveryOrderRequest;
+use Paysera\DeliverySdk\Exception\CredentialsValidationException;
 use Paysera\DeliverySdk\Exception\DeliveryOrderRequestException;
+use Paysera\DeliverySdk\Exception\MerchantClientNotFoundException;
+use Paysera\DeliverySdk\Exception\RateLimitExceededException;
 use Paysera\DeliverySdk\Repository\MerchantOrderRepositoryInterface;
 
 class DeliveryOrderService
@@ -69,6 +73,37 @@ class DeliveryOrderService
         return $deliveryOrderRequest->getOrder();
     }
 
+    /**
+     * @param ProjectCredentials $credentials
+     * @return bool
+     * @throws CredentialsValidationException
+     * @throws RateLimitExceededException
+     * @throws MerchantClientNotFoundException
+     */
+    public function validateCredentials(ProjectCredentials $credentials): bool
+    {
+        $this->logCredentialsValidationStarted($credentials);
+
+        try {
+            $isValid = $this->deliveryApiClient->validateCredentials($credentials);
+            $this->logCredentialsValidationCompleted($credentials, $isValid);
+
+            return $isValid;
+        } catch (RateLimitExceededException $exception) {
+            $this->logCredentialsValidationRateLimitError($credentials, $exception);
+
+            throw $exception;
+        } catch (MerchantClientNotFoundException $exception) {
+            $this->logCredentialsValidationMerchantNotFoundError($credentials, $exception);
+
+            throw $exception;
+        } catch (CredentialsValidationException $exception) {
+            $this->logCredentialsValidationError($credentials, $exception);
+
+            throw $exception;
+        }
+    }
+
     #region Handling
 
     /**
@@ -119,6 +154,71 @@ class DeliveryOrderService
                 $orderNumber,
                 $order->getNumber(),
             )
+        );
+    }
+
+    private function logCredentialsValidationStarted(ProjectCredentials $credentials): void
+    {
+        $this->logger->info(
+            sprintf(
+                'Attempting to perform operation \'%s\' for project id: %s',
+                DeliveryApiClient::ACTION_VALIDATE_CREDENTIALS,
+                $credentials->getProjectId()
+            )
+        );
+    }
+
+    private function logCredentialsValidationCompleted(ProjectCredentials $credentials, bool $isValid): void
+    {
+        $this->logger->info(
+            sprintf(
+                'Operation \'%s\' for project id %s completed with result: %s',
+                DeliveryApiClient::ACTION_VALIDATE_CREDENTIALS,
+                $credentials->getProjectId(),
+                $isValid ? 'valid' : 'invalid'
+            )
+        );
+    }
+
+    private function logCredentialsValidationRateLimitError(
+        ProjectCredentials $credentials,
+        RateLimitExceededException $exception
+    ): void {
+        $this->logger->error(
+            sprintf(
+                'Operation \'%s\' for project id %s failed due to rate limit.',
+                DeliveryApiClient::ACTION_VALIDATE_CREDENTIALS,
+                $credentials->getProjectId()
+            ),
+            $exception
+        );
+    }
+
+    private function logCredentialsValidationMerchantNotFoundError(
+        ProjectCredentials $credentials,
+        MerchantClientNotFoundException $exception
+    ): void {
+        $this->logger->error(
+            sprintf(
+                'Operation \'%s\' for project id %s failed: merchant client not found.',
+                DeliveryApiClient::ACTION_VALIDATE_CREDENTIALS,
+                $credentials->getProjectId()
+            ),
+            $exception
+        );
+    }
+
+    private function logCredentialsValidationError(
+        ProjectCredentials $credentials,
+        CredentialsValidationException $exception
+    ): void {
+        $this->logger->error(
+            sprintf(
+                'Operation \'%s\' for project id %s failed.',
+                DeliveryApiClient::ACTION_VALIDATE_CREDENTIALS,
+                $credentials->getProjectId()
+            ),
+            $exception
         );
     }
 

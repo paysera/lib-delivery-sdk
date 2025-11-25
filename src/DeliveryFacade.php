@@ -4,10 +4,14 @@ declare(strict_types=1);
 
 namespace Paysera\DeliverySdk;
 
+use Paysera\DeliveryApi\MerchantClient\Entity\ProjectCredentials;
 use Paysera\DeliverySdk\Entity\MerchantOrderInterface;
 use Paysera\DeliverySdk\Entity\PayseraDeliveryOrderRequest;
+use Paysera\DeliverySdk\Exception\MerchantClientNotFoundException;
+use Paysera\DeliverySdk\Exception\RateLimitExceededException;
 use Paysera\DeliverySdk\Service\DeliveryOrderCallbackService;
 use Paysera\DeliverySdk\Service\DeliveryOrderService;
+use Paysera\DeliverySdk\Exception\CredentialsValidationException;
 use Paysera\DeliverySdk\Exception\DeliveryOrderRequestException;
 use Paysera\DeliverySdk\Exception\DeliveryGatewayNotFoundException;
 
@@ -61,5 +65,17 @@ class DeliveryFacade
     public function prepaidDeliveryOrder(PayseraDeliveryOrderRequest $deliveryOrderRequest): ?MerchantOrderInterface
     {
         return $this->deliveryOrderService->prepaidDeliveryOrder($deliveryOrderRequest);
+    }
+
+    /**
+     * @param ProjectCredentials $credentials
+     * @return bool
+     * @throws CredentialsValidationException
+     * @throws RateLimitExceededException
+     * @throws MerchantClientNotFoundException
+     */
+    public function validateCredentials(ProjectCredentials $credentials): bool
+    {
+        return $this->deliveryOrderService->validateCredentials($credentials);
     }
 }

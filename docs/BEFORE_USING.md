@@ -18,6 +18,7 @@ This SDK provides tools for working with the Paysera Delivery API. To ensure the
 6. [MerchantOrderLoggerInterface.php](../src/Service/MerchantOrderLoggerInterface.php) - A logger for info messages related to your (merchant) order processing
 
 ## And after implementing necessary interfaces, go to use cases
-- [Delivery orders creating](docs/DELIVERY_ORDER_CREATING.md)
-- [Delivery orders updating](docs/DELIVERY_ORDER_UPDATING.md)
-- [Callbacks handling](docs/HANDLING_CALLBACKS_FROM_API.md)
+- [Validating credentials](VALIDATING_CREDENTIALS.md)
+- [Delivery orders creating](DELIVERY_ORDER_CREATING.md)
+- [Delivery orders updating](DELIVERY_ORDER_UPDATING.md)
+- [Callbacks handling](HANDLING_CALLBACKS_FROM_API.md)
