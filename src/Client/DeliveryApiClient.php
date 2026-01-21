@@ -163,6 +163,8 @@ class DeliveryApiClient
      * @return void
      * @throws RateLimitExceededException
      * @throws CredentialsValidationException
+     *
+     * @phpstan-return never
      */
     private function handleCredentialsValidationClientException(
         ClientException $exception,
