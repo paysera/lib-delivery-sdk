@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace Paysera\DeliverySdk\Tests;
 
 use PHPUnit\Framework\TestCase;
+use Paysera\DeliveryApi\MerchantClient\Entity\ProjectCredentials;
 use Paysera\DeliverySdk\DeliveryFacade;
 use Paysera\DeliverySdk\Entity\MerchantOrderInterface;
 use Paysera\DeliverySdk\Entity\PayseraDeliveryOrderRequest;
 use Paysera\DeliverySdk\Service\DeliveryOrderService;
 use Paysera\DeliverySdk\Service\DeliveryOrderCallbackService;
+use Paysera\DeliverySdk\Exception\CredentialsValidationException;
 use Paysera\DeliverySdk\Exception\DeliveryOrderRequestException;
 use Paysera\DeliverySdk\Exception\DeliveryGatewayNotFoundException;
 
@@ -122,5 +124,71 @@ class DeliveryFacadeTest extends TestCase
             ->willThrowException(new DeliveryGatewayNotFoundException('gatewayCode', 'orderNumber'));
 
         $this->deliveryFacade->updateMerchantOrder($deliveryOrderRequest);
+    }
+
+    public static function validateCredentialsResultProvider(): array
+    {
+        return [
+            'valid credentials' => [
+                'projectId' => '123456',
+                'password' => '6943a905f5a1a5ebd29b4f3c4c15b818',
+                'expectedResult' => true,
+            ],
+            'invalid credentials' => [
+                'projectId' => '123456',
+                'password' => 'invalid_password',
+                'expectedResult' => false,
+            ],
+        ];
+    }
+
+    /**
+     * @dataProvider validateCredentialsResultProvider
+     */
+    public function testValidateCredentialsResult(
+        string $projectId,
+        string $password,
+        bool $expectedResult
+    ): void {
+        $credentials = new ProjectCredentials([
+            'project_id' => $projectId,
+            'password' => $password,
+        ]);
+
+        $this->deliveryOrderService
+            ->expects($this->once())
+            ->method('validateCredentials')
+            ->with($this->callback(function ($arg) use ($credentials) {
+                return $arg instanceof ProjectCredentials
+                    && $arg->getProjectId() === $credentials->getProjectId()
+                    && $arg->getPassword() === $credentials->getPassword();
+            }))
+            ->willReturn($expectedResult);
+
+        $result = $this->deliveryFacade->validateCredentials($credentials);
+
+        $this->assertSame($expectedResult, $result);
+    }
+
+    public function testValidateCredentialsThrowsException(): void
+    {
+        $this->expectException(CredentialsValidationException::class);
+
+        $credentials = new ProjectCredentials([
+            'project_id' => '123456',
+            'password' => '6943a905f5a1a5ebd29b4f3c4c15b818',
+        ]);
+
+        $this->deliveryOrderService
+            ->expects($this->once())
+            ->method('validateCredentials')
+            ->with($this->callback(function ($arg) use ($credentials) {
+                return $arg instanceof ProjectCredentials
+                    && $arg->getProjectId() === $credentials->getProjectId()
+                    && $arg->getPassword() === $credentials->getPassword();
+            }))
+            ->willThrowException(new CredentialsValidationException('401 Unauthorized', null));
+
+        $this->deliveryFacade->validateCredentials($credentials);
     }
 }

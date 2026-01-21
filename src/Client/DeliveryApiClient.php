@@ -6,10 +6,15 @@ namespace Paysera\DeliverySdk\Client;
 
 use Closure;
 use Exception;
+use Paysera\Component\RestClientCommon\Exception\ClientException;
 use Paysera\DeliveryApi\MerchantClient\Entity\Order;
+use Paysera\DeliveryApi\MerchantClient\Entity\ProjectCredentials;
 use Paysera\DeliverySdk\Entity\MerchantOrderInterface;
 use Paysera\DeliverySdk\Entity\PayseraDeliveryOrderRequest;
+use Paysera\DeliverySdk\Exception\CredentialsValidationException;
 use Paysera\DeliverySdk\Exception\DeliveryOrderRequestException;
+use Paysera\DeliverySdk\Exception\MerchantClientNotFoundException;
+use Paysera\DeliverySdk\Exception\RateLimitExceededException;
 use Paysera\DeliverySdk\Service\DeliveryLoggerInterface;
 
 class DeliveryApiClient
@@ -18,6 +23,7 @@ class DeliveryApiClient
     public const ACTION_UPDATE = 'update';
     public const ACTION_PREPAID = 'prepaid';
     public const ACTION_GET = 'get';
+    public const ACTION_VALIDATE_CREDENTIALS = 'validate_credentials';
 
     private DeliveryOrderApiClient $orderRequestHandler;
     private DeliveryLoggerInterface $logger;
@@ -94,6 +100,31 @@ class DeliveryApiClient
     }
 
     /**
+     * @param ProjectCredentials $credentials
+     * @return bool
+     * @throws CredentialsValidationException
+     * @throws RateLimitExceededException
+     * @throws MerchantClientNotFoundException
+     */
+    public function validateCredentials(ProjectCredentials $credentials): bool
+    {
+        try {
+            return $this->orderRequestHandler->validateCredentials($credentials);
+        } catch (MerchantClientNotFoundException $exception) {
+            $this->logger->error(
+                sprintf(
+                    'Credentials validation failed for project %s: Merchant client not found',
+                    $credentials->getProjectId()
+                )
+            );
+
+            throw $exception;
+        } catch (ClientException $exception) {
+            $this->handleCredentialsValidationClientException($exception, $credentials);
+        }
+    }
+
+    /**
      * @param string $action
      * @param Closure $handler
      * @param PayseraDeliveryOrderRequest $deliveryOrderRequest
@@ -121,6 +152,43 @@ class DeliveryApiClient
                 'Cannot perform operation \'%s\' on delivery order for order id %s.',
                 $action,
                 $order->getNumber(),
+            ),
+            $exception
+        );
+    }
+
+    /**
+     * @param ClientException $exception
+     * @param ProjectCredentials $credentials
+     * @return void
+     * @throws RateLimitExceededException
+     * @throws CredentialsValidationException
+     */
+    private function handleCredentialsValidationClientException(
+        ClientException $exception,
+        ProjectCredentials $credentials
+    ): void {
+        $response = $exception->getResponse();
+
+        $this->logger->error(
+            sprintf(
+                'Credentials validation failed for project %s: HTTP %d',
+                $credentials->getProjectId(),
+                $response->getStatusCode()
+            )
+        );
+
+        if ($response->getStatusCode() === 429) {
+            throw new RateLimitExceededException(
+                $exception
+            );
+        }
+
+        throw new CredentialsValidationException(
+            sprintf(
+                '%s %s',
+                $response->getStatusCode(),
+                $response->getReasonPhrase()
             ),
             $exception
         );

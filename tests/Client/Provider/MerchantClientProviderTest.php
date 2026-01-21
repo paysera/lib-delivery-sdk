@@ -67,6 +67,37 @@ class MerchantClientProviderTest extends TestCase
         $this->assertTrue($options['headers']['Paysera-Test-Mode']);
     }
 
+    public function testReturnsPublicMerchantClientSuccessfully(): void
+    {
+        $provider = new MerchantClientProvider($this->logger);
+        $client = $provider->getPublicMerchantClient();
+
+        $this->assertInstanceOf(MerchantClient::class, $client);
+    }
+
+    public function testPublicMerchantClientHasNoMacAuthentication(): void
+    {
+        $provider = new MerchantClientProvider($this->logger);
+        $client = $provider->getPublicMerchantClient();
+
+        $apiClient = $this->getPrivateProperty($client, 'apiClient');
+        $options = $this->getPrivateProperty($apiClient, 'options');
+
+        $this->assertArrayNotHasKey('mac', $options);
+    }
+
+    public function testPublicMerchantClientHasCorrectUserAgent(): void
+    {
+        $provider = new MerchantClientProvider($this->logger);
+        $client = $provider->getPublicMerchantClient();
+
+        $apiClient = $this->getPrivateProperty($client, 'apiClient');
+        $options = $this->getPrivateProperty($apiClient, 'options');
+
+        $this->assertArrayHasKey('headers', $options);
+        $this->assertSame('Paysera-Delivery-SDK', $options['headers']['User-Agent']);
+    }
+
     private function getPrivateProperty(object $object, string $propertyName)
     {
         $reflection = new ReflectionClass($object);
