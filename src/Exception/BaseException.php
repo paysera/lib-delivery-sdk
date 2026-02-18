@@ -16,4 +16,6 @@ abstract class BaseException extends Exception
     public const E_INVALID_TYPE = 6;
     public const E_UNDEFINED_DELIVERY_GATEWAY = 7;
     public const E_UNDEFINED_DELIVERY_ORDER = 8;
+    public const E_CREDENTIALS_VALIDATION_FAILED = 9;
+    public const E_RATE_LIMIT_EXCEEDED = 10;
 }

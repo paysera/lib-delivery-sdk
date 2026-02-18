@@ -5,10 +5,14 @@ declare(strict_types=1);
 namespace Paysera\DeliverySdk\Tests\Service;
 
 use Paysera\DeliveryApi\MerchantClient\Entity\Order;
+use Paysera\DeliveryApi\MerchantClient\Entity\ProjectCredentials;
 use Paysera\DeliverySdk\Client\DeliveryApiClient;
 use Paysera\DeliverySdk\Entity\MerchantOrderInterface;
 use Paysera\DeliverySdk\Entity\PayseraDeliveryOrderRequest;
 use Paysera\DeliverySdk\Entity\PayseraDeliverySettingsInterface;
+use Paysera\DeliverySdk\Exception\CredentialsValidationException;
+use Paysera\DeliverySdk\Exception\MerchantClientNotFoundException;
+use Paysera\DeliverySdk\Exception\RateLimitExceededException;
 use Paysera\DeliverySdk\Repository\MerchantOrderRepositoryInterface;
 use Paysera\DeliverySdk\Service\DeliveryLoggerInterface;
 use Paysera\DeliverySdk\Service\DeliveryOrderService;
@@ -117,5 +121,145 @@ class DeliveryOrderServiceTest extends TestCase
         $result = $this->service->prepaidDeliveryOrder($deliveryOrderRequest);
 
         $this->assertSame($order, $result);
+    }
+
+    public static function validateCredentialsResultProvider(): array
+    {
+        return [
+            'valid credentials' => [
+                'projectId' => '123456',
+                'password' => '6943a905f5a1a5ebd29b4f3c4c15b818',
+                'expectedResult' => true,
+                'expectedResultString' => 'valid',
+            ],
+            'invalid credentials' => [
+                'projectId' => '123456',
+                'password' => 'invalid_password',
+                'expectedResult' => false,
+                'expectedResultString' => 'invalid',
+            ],
+        ];
+    }
+
+    /**
+     * @dataProvider validateCredentialsResultProvider
+     */
+    public function testValidateCredentialsResult(
+        string $projectId,
+        string $password,
+        bool $expectedResult,
+        string $expectedResultString
+    ): void {
+        $credentials = new ProjectCredentials([
+            'project_id' => $projectId,
+            'password' => $password,
+        ]);
+
+        $this->deliveryApiClient->expects($this->once())
+            ->method('validateCredentials')
+            ->with($this->callback(function ($arg) use ($credentials) {
+                return $arg instanceof ProjectCredentials
+                    && $arg->getProjectId() === $credentials->getProjectId()
+                    && $arg->getPassword() === $credentials->getPassword();
+            }))
+            ->willReturn($expectedResult);
+
+        $this->logger->expects($this->exactly(2))
+            ->method('info')
+            ->withConsecutive(
+                [$this->stringContains("Attempting to perform operation 'validate_credentials' for project id: {$projectId}")],
+                [$this->stringContains("Operation 'validate_credentials' for project id {$projectId} completed with result: {$expectedResultString}")]
+            );
+
+        $result = $this->service->validateCredentials($credentials);
+
+        $this->assertSame($expectedResult, $result);
+    }
+
+    public function testValidateCredentialsThrowsRateLimitExceededException(): void
+    {
+        $credentials = new ProjectCredentials([
+            'project_id' => '123456',
+            'password' => '6943a905f5a1a5ebd29b4f3c4c15b818',
+        ]);
+
+        $exception = new RateLimitExceededException(null);
+
+        $this->deliveryApiClient->expects($this->once())
+            ->method('validateCredentials')
+            ->willThrowException($exception);
+
+        $this->logger->expects($this->once())
+            ->method('info')
+            ->with($this->stringContains("Attempting to perform operation 'validate_credentials' for project id: 123456"));
+
+        $this->logger->expects($this->once())
+            ->method('error')
+            ->with(
+                $this->stringContains("Operation 'validate_credentials' for project id 123456 failed due to rate limit."),
+                $exception
+            );
+
+        $this->expectException(RateLimitExceededException::class);
+
+        $this->service->validateCredentials($credentials);
+    }
+
+    public function testValidateCredentialsThrowsMerchantClientNotFoundException(): void
+    {
+        $credentials = new ProjectCredentials([
+            'project_id' => '123456',
+            'password' => '6943a905f5a1a5ebd29b4f3c4c15b818',
+        ]);
+
+        $exception = new MerchantClientNotFoundException();
+
+        $this->deliveryApiClient->expects($this->once())
+            ->method('validateCredentials')
+            ->willThrowException($exception);
+
+        $this->logger->expects($this->once())
+            ->method('info')
+            ->with($this->stringContains("Attempting to perform operation 'validate_credentials' for project id: 123456"));
+
+        $this->logger->expects($this->once())
+            ->method('error')
+            ->with(
+                $this->stringContains("Operation 'validate_credentials' for project id 123456 failed: merchant client not found."),
+                $exception
+            );
+
+        $this->expectException(MerchantClientNotFoundException::class);
+
+        $this->service->validateCredentials($credentials);
+    }
+
+    public function testValidateCredentialsThrowsCredentialsValidationException(): void
+    {
+        $credentials = new ProjectCredentials([
+            'project_id' => '123456',
+            'password' => 'invalid_password',
+        ]);
+
+        $exception = new CredentialsValidationException('401 Unauthorized', null);
+
+        $this->deliveryApiClient->expects($this->once())
+            ->method('validateCredentials')
+            ->willThrowException($exception);
+
+        $this->logger->expects($this->once())
+            ->method('info')
+            ->with($this->stringContains("Attempting to perform operation 'validate_credentials' for project id: 123456"));
+
+        $this->logger->expects($this->once())
+            ->method('error')
+            ->with(
+                $this->stringContains("Operation 'validate_credentials' for project id 123456 failed."),
+                $exception
+            );
+
+        $this->expectException(CredentialsValidationException::class);
+
+        $this->service->validateCredentials($credentials);
     }
 }
