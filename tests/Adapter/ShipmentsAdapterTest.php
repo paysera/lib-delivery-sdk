@@ -33,7 +33,7 @@ class ShipmentsAdapterTest extends TestCase
             ->method('isSinglePerOrderShipmentEnabled')
             ->willReturn(false);
 
-        $shipments = [...$this->shipmentsAdapter->convert($this->itemsCollection)];
+        $shipments = [...$this->shipmentsAdapter->convert($this->itemsCollection, $this->settingsMock)];
 
         $this->assertCount(2, $shipments);
 
@@ -56,8 +56,12 @@ class ShipmentsAdapterTest extends TestCase
         $this->settingsMock
             ->method('isSinglePerOrderShipmentEnabled')
             ->willReturn(true);
+        $this->settingsMock->method('getDefaultParcelLength')->willReturn(100);
+        $this->settingsMock->method('getDefaultParcelWidth')->willReturn(80);
+        $this->settingsMock->method('getDefaultParcelHeight')->willReturn(60);
+        $this->settingsMock->method('getDefaultParcelWeight')->willReturn(120);
 
-        $shipments = [...$this->shipmentsAdapter->convert($this->itemsCollection, true)];
+        $shipments = [...$this->shipmentsAdapter->convert($this->itemsCollection, $this->settingsMock)];
 
         $this->assertCount(1, $shipments);
         $shipment = $shipments[0];
@@ -66,6 +70,17 @@ class ShipmentsAdapterTest extends TestCase
         $this->assertEquals(80, $shipment->getWidth());
         $this->assertEquals(60, $shipment->getHeight());
         $this->assertEquals(120, $shipment->getWeight());
+    }
+
+    public function testConvertWithSingleShipmentReturnsNothingWhenItemsAreEmpty(): void
+    {
+        $this->settingsMock
+            ->method('isSinglePerOrderShipmentEnabled')
+            ->willReturn(true);
+
+        $shipments = [...$this->shipmentsAdapter->convert(new OrderItemsCollection([]), $this->settingsMock)];
+
+        $this->assertCount(0, $shipments);
     }
 
     private function createItemMock(int $height, int $width, int $length, int $weight): MerchantOrderItemInterface
